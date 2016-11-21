@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Models;
+
+class ProcedureBenefits extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $procedure_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $benefit_id;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->belongsTo('procedure_id', __NAMESPACE__.'\Procedures', 'id', array('alias' => 'Procedures'));
+        $this->belongsTo('benefit_id', __NAMESPACE__.'\Benefits', 'id', array('alias' => 'Benefits'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'procedure_benefits';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return ProcedureBenefits[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return ProcedureBenefits
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

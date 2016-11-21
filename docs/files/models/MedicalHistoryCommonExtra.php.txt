@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Models;
+
+
+class MedicalHistoryCommonExtra extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $medical_history_common_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $field_name;
+
+    /**
+     *
+     * @var string
+     */
+    public $field_value;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->belongsTo('medical_history_common_id', __NAMESPACE__.'MedicalHistoryCommon', 'id', array('alias' => 'MedicalHistoryCommon'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'medical_history_common_extra';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryCommonExtra[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryCommonExtra
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

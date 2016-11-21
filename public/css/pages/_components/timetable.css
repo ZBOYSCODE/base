@@ -1,0 +1,967 @@
+
+/**/
+/* timetable */
+/**/
+
+
+.bloque-hora-1, .bloque-hora-2, .bloque-hora-3, .bloque-hora-4, .bloque-hora-5, .bloque-hora-6, .bloque-hora-100{
+    margin-bottom: 1px;
+    margin-top: 1px;
+    min-height: 40px;
+}
+
+.bloque-semanal {
+
+    padding: 11px;
+    color: #868585;
+    font-size: 11px;
+    font-weight: bolder;
+}
+
+.bloque-semanal:hover {
+    background: #d29164;
+    color: white;
+    cursor: pointer;
+}
+
+.bloque-green {
+    border-left: 10px solid #7ba764;
+    background-color: rgba(89, 167, 74, 0.56);
+    padding: 11px;
+    color: #fffefe;
+    font-size: 11px;
+    font-weight: bolder;
+}
+
+.bloque-green.active-turn {
+    background-color: rgba(204, 46, 11, 0.56);
+    border-left: 10px solid #c54b4b;
+}
+
+
+.bloque-green:hover {
+    background-color: #7e7e7e;
+}
+
+.overcrowd {
+    border-left: 10px solid #df6471 !important;
+}
+
+.bloque-hora-1 {
+    border-left: 10px solid #c7c7c7; ;
+    background-color: rgba(235, 235, 235, 0.56);
+}
+
+.bloque-hora-2 {
+    border-left: 10px solid #BEE49C ;
+    background-color: rgba(190, 228, 156, 0.56);
+}
+
+.bloque-hora-3 {
+    border-left: 10px solid #B1DEEA ;
+    background-color: rgba(177, 222, 234, 0.55);
+}
+
+.bloque-hora-4 {
+    border-left: 10px solid #CDA6CC ;
+    background-color: rgba(205, 166, 204, 0.55);
+}
+
+.bloque-hora-5 {
+    border-left: 10px solid #F2BAB8 ;
+    background-color: rgba(242, 186, 184, 0.55);
+}
+
+.bloque-hora-6 {
+    border-left: 10px solid #fa7c7e;
+    background-color: rgba(250, 124, 126, 0.55);
+}
+
+.bloque-hora-7 {
+    border-left: 10px solid #f1f1f1;
+    background-color: rgb(250, 250, 250);
+    color: #95989f;
+}
+
+.bloque-hora-8 {
+    border-left: 10px solid #ffe3b5;
+    background-color: #fff3df;
+    color: #848790;
+}
+.bloque-hora-9 {
+    border-left: 10px solid #ffbe5c;
+    background-color: rgb(255, 227, 177);
+    color: #6b6e75;
+}
+
+.bloque-hora-300 {
+    border-left: 10px solid #97c6e9;
+    background-color: rgb(255, 255, 255);
+    border-right: 2px solid #97c6e9;
+    border-bottom: 2px solid #97c6e9;
+    border-top: 2px solid #97c6e9;
+    color: #b0aeae
+}
+
+.bloque-hora-300.owner {
+    border-left: 10px solid #97c6e9 !important;
+    background-color: rgb(71, 137, 153) !important;
+    border-right: 2px solid #97c6e9 !important;
+    border-top: 2px solid #97c6e9 !important;
+    border-bottom: 2px solid #97c6e9 !important;
+    color: white !important;
+}
+
+.bloque-hora-100 {
+    border-left: 10px solid #e6e6e6;
+    background-color: white;
+}
+
+.timetable {
+    background-color: white;
+}
+
+.timetable .filter {
+    float: right;
+    width: 270px;
+    height: 30px;
+    margin-top: -43px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.timetable header {
+    position: relative;
+    height: 94px;
+    text-align: center;
+}
+.timetable .year {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6%;
+    font-size: 24px;
+    line-height: 94px;
+    color: rgba(255,255,255,0.5);
+}
+.timetable .month {
+    padding-top: 10px;
+    font-size: 30px;
+    line-height: 30px;
+    color: #fff;
+}
+.timetable .day {
+    position: relative;
+    width: 220px;
+    margin: 10px auto;
+}
+.timetable .day a {
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+    line-height: 26px;
+    text-align: center;
+    color: rgba(0,0,0,0.3);
+}
+.timetable .day input {
+    height: 28px;
+    padding: 3px 40px 3px 5px;
+    border-radius: 14px;
+    text-align: center;
+}
+.timetable .day .cal {
+    top: 0;
+    right: 0;
+    width: 35px;
+    padding-right: 5px;
+    font-size: 14px;
+    line-height: 28px;
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+.timetable .day .prev {
+    left: -38px;
+}
+.timetable .day .next {
+    right: -38px;
+}
+.timetable .switcher {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 146px;
+    height: 100%;
+    padding: 30px 0;
+    font-size: 0;
+}
+.timetable .switcher a {
+    display: inline-block;
+    vertical-align: middle;
+    width: 34px;
+    height: 34px;
+    overflow: hidden;
+    margin: 0 2px;
+    border-radius: 50px;
+    background: #fff;
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+    font-size: 14px;
+    line-height: 34px;
+    text-align: center;
+}
+.timetable .switcher .active {
+    box-shadow: 1px 1px 0 rgba(255,255,255,0.1);
+    color: #fff;
+    cursor: default;
+}
+.timetable .switcher .active:hover {
+    color: #fff;
+}
+.timetable .switcher .fa-list {
+    line-height: 36px;
+}
+
+.timetable .month-view th {
+    width: 14.28%;
+    padding: 20px 0;
+    font-size: 12px;
+    line-height: 16px;
+}
+.timetable .month-view td {
+    width: 14.28%;
+    border: 1px solid #fff;
+    background: #efefef;
+    vertical-align: top;
+    font-size: 12px;
+    line-height: 16px;
+    color: #000;
+    -webkit-user-select: none;
+}
+.timetable .month-view td:first-child {
+    border-left: 0;
+}
+.timetable .month-view td:last-child {
+    border-right: 0;
+}
+.timetable .month-view .event {
+    position: relative;
+}
+.timetable .month-view .event a {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.timetable .month-view .event a span {
+    display: none;
+}
+.timetable .month-view .event a:hover span {
+    display: block;
+}
+.timetable .month-view .title {
+    padding: 40px 50px 20px 20px;
+    text-transform: uppercase;
+    color: #fff;
+}
+.timetable .month-view .date {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    line-height: 40px;
+    text-align: center;
+    color: #7c7c7c;
+}
+.timetable .month-view .title + .date {
+    color: #fff;
+}
+.timetable .month-view .details {
+    position: relative;
+    padding: 20px;
+}
+.timetable .month-view .popup {
+    position: absolute;
+    bottom: 100%;
+    left: -9999px;
+    width: 100%;
+    color: #fff;
+    opacity: 0;
+    -o-transition: opacity 0.3s;
+    -ms-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -webkit-transition: opacity 0.3s;
+}
+.timetable .month-view .popup:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border-top: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+.timetable .month-view .popup p {
+    padding: 0 20px 20px;
+}
+.timetable .month-view .popup .title {
+    padding-top: 20px;
+    background: inherit;
+}
+.timetable .month-view .event-container {
+    -o-transition: background 0.3s, color 0.3s;
+    -ms-transition: background 0.3s, color 0.3s;
+    -moz-transition: background 0.3s, color 0.3s;
+    -webkit-transition: background 0.3s, color 0.3s;
+}
+.timetable .month-view .event-container:hover {
+    color: #fff;
+}
+.timetable .month-view .event-container:hover .popup {
+    left: 0;
+    opacity: 1;
+}
+.timetable.green .week-view th {
+    color: #53ac53;
+}
+
+.timetable .week-view th {
+    width: 12.5%;
+    padding: 5px 0;
+    font-size: 12px;
+    line-height: 16px;
+    color: #008fd5;
+}
+.timetable .week-view th span {
+    color: #7c7c7c;
+}
+.timetable .week-view td {
+    width: 20%;
+    vertical-align: top;
+    font-size: 12px;
+    line-height: 16px;
+    color: #000;
+    -webkit-user-select: none;
+    border-top: 1px solid #eaeaea;
+    border-bottom: 1px solid #eaeaea;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #ffffff;
+    height: 43px;
+}
+.timetable .week-view td:first-child {
+    vertical-align: middle;
+    text-align: center;
+    color: #7c7c7c;
+}
+.timetable .week-view td:first-child i {
+    display: block;
+    margin: 0 auto 10px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+}
+.timetable .week-view .event {
+    position: relative;
+}
+.timetable .week-view .event a {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.timetable .week-view .event a span {
+    display: none;
+}
+.timetable .week-view .event a:hover span {
+    display: block;
+}
+.timetable .week-view .event-container {
+    background: #e8e8e8;
+}
+.timetable .week-view .event-container {
+    -o-transition: background 0.3s, color 0.3s;
+    -ms-transition: background 0.3s, color 0.3s;
+    -moz-transition: background 0.3s, color 0.3s;
+    -webkit-transition: background 0.3s, color 0.3s;
+}
+.timetable .week-view .event-container:hover {
+    color: #fff;
+}
+.timetable .week-view .title {
+    color: #fff;
+    font-size: 10px;
+    min-height: 27px;
+    padding: 7px;
+    overflow: hidden;
+    word-wrap: break-word;
+    max-height: 27px;
+}
+
+.timetable .week-view .title-pop {
+    font-size: 14px;
+    padding: 15px;
+}
+
+.timetable .week-view .details {
+    position: relative;
+    text-align: center;
+    font-size: 10px;
+}
+.timetable .week-view .popup {
+    position: absolute;
+    bottom: 100%;
+    left: -9999px;
+    width: 300px;
+    z-index: 1000;
+    color: #fff;
+    opacity: 0;
+    -o-transition: opacity 0.3s;
+    -ms-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -webkit-transition: opacity 0.3s;
+}
+.timetable .week-view .popup:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -124px;
+    border-top: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-left: 10px solid transparent;
+}
+.timetable .week-view .popup p {
+    padding: 0 20px 20px;
+}
+.timetable .week-view .popup .title {
+    padding-top: 20px;
+    background: inherit;
+}
+.timetable .week-view .event-container:hover .popup {
+    left: 0;
+    opacity: 1;
+}
+.timetable .list-view th {
+    width: 15%;
+    padding: 20px 0;
+    font-size: 12px;
+    line-height: 16px;
+}
+.timetable .list-view th:last-child {
+    width: 70%;
+    padding-left: 20px;
+    text-align: left;
+}
+.timetable .list-view td {
+    width: 6%;
+    border: 1px solid #e3e3e3;
+    vertical-align: middle;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    color: #7c7c7c;
+    -webkit-user-select: none;
+}
+.timetable .list-view td i {
+    display: block;
+    margin: 0 auto 10px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+}
+.timetable .list-view td:last-child {
+    width: 70%;
+    vertical-align: top;
+    font-size: 13px;
+    line-height: 22px;
+    text-align: left;
+}
+.timetable .list-view .event {
+    position: relative;
+    padding: 20px;
+}
+.timetable .list-view .event a {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.timetable .list-view .event a span {
+    display: none;
+}
+.timetable .list-view .event a:hover span {
+    display: block;
+}
+.timetable .list-view .title {
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    color: #000;
+    -o-transition: color 0.3s;
+    -ms-transition: color 0.3s;
+    -moz-transition: color 0.3s;
+    -webkit-transition: color 0.3s;
+}
+.timetable .list-view .event-container:hover .title {
+    color: #fff;
+}
+.timetable .list-view .event-container {
+    background: #efefef;
+}
+.timetable .list-view .event-container {
+    -o-transition: background 0.3s, color 0.3s;
+    -ms-transition: background 0.3s, color 0.3s;
+    -moz-transition: background 0.3s, color 0.3s;
+    -webkit-transition: background 0.3s, color 0.3s;
+}
+.timetable .list-view .event-container:hover {
+    color: #fff;
+}
+.timetable .list-view .popup {
+    font-size: 12px;
+    position: absolute;
+    bottom: 100%;
+    left: -9999px;
+    width: 100%;
+    padding: 20px;
+    color: #fff;
+    opacity: 0;
+    -ms-box-sizing:border-box;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-transition: opacity 0.3s;
+    -ms-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -webkit-transition: opacity 0.3s;
+}
+.timetable .list-view .popup:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border-top: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+.timetable .list-view .event-container:hover .popup {
+    left: 0;
+    opacity: 1;
+}
+.timetable .mobile-view {
+    display: none;
+}
+.timetable .mobile-view dt {
+    margin-top: 30px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #000;
+}
+.timetable .mobile-view dt span {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+.timetable .mobile-view li {
+    position: relative;
+    padding: 14px 0 14px 28px;
+    border-bottom: 1px solid #e1e1e1;
+    line-height: 20px;
+    color: #000;
+}
+.timetable .mobile-view li i {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+}
+.timetable .mobile-view li span {
+    float: right;
+    margin-left: 10px;
+    font-size: 12px;
+    color: #7c7c7c;
+}
+@media screen and (max-width: 1190px) { /* laptop */
+    .page-header.main-page:after{
+        margin-right:-496px;
+    }
+    .timetable .filter {
+        width: 220px;
+    }
+    .timetable .month-view .title {
+        padding: 35px 15px 15px 15px;
+    }
+    .timetable .month-view .date {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
+    .timetable .month-view .details {
+        padding: 15px;
+    }
+    .timetable .month-view .popup p {
+        padding: 0 15px 15px;
+    }
+    .timetable .month-view .popup .title {
+        padding-top: 35px;
+    }
+    .timetable .week-view th span {
+        display: none;
+    }
+    .timetable .week-view .details {
+        padding: 15px;
+    }
+    .timetable .week-view .popup p {
+        padding: 0 15px 15px;
+    }
+}
+@media screen and (max-width: 980px) { /* pad */
+    .page-header.main-page:after{
+        margin-right:-395px;
+    }
+    .timetable .filter {
+        width: 171px;
+    }
+    .timetable .month-view th,
+    .timetable .month-view td {
+        font-size: 11px;
+        line-height: 14px;
+    }
+    .timetable .month-view .title {
+        padding: 20px 10px 10px 10px;
+        font-size: 11px;
+        line-height: 15px;
+    }
+    .timetable .month-view .date {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        line-height: 20px;
+    }
+    .timetable .month-view .details {
+        padding: 10px;
+    }
+    .timetable .month-view .popup p {
+        padding: 0 10px 10px;
+    }
+    .timetable .month-view .popup .title {
+        padding-top: 20px;
+    }
+    .timetable .week-view th,
+    .timetable .week-view td {
+        width: 14.14%;
+        font-size: 11px;
+        line-height: 14px;
+    }
+    .timetable .week-view th:first-child,
+    .timetable .week-view td:first-child {
+        width: 1%;
+        padding: 0 5px;
+    }
+    .timetable .week-view .title {
+        padding: 10px;
+    }
+    .timetable .week-view .details {
+        padding: 10px;
+    }
+    .timetable .week-view .popup p {
+        padding: 0 10px 10px;
+    }
+}
+@media screen and (max-width: 767px) { /* phone */
+    .page-header.main-page:after{
+        display:none;
+    }
+    .timetable header {
+        height: auto;
+    }
+    .timetable .year {
+        position: static;
+        width: auto;
+        line-height: 48px;
+    }
+    .timetable .month {
+        padding-top: 20px;
+    }
+    .timetable .switcher {
+        position: static;
+        width: auto;
+        margin-top: 20px;
+        padding: 15px 0;
+    }
+    .timetable .month-view,
+    .timetable .week-view,
+    .timetable .list-view {
+        display: none;
+    }
+    .timetable .mobile-view {
+        display: block;
+    }
+}
+@media screen and (max-width: 479px) { /* mini phone */
+    .timetable .filter {
+        float: none;
+        margin: 0 0 20px;
+        width: 100%;
+    }
+    .timetable .day {
+        width: auto;
+        margin-right: 48px;
+        margin-left: 48px;
+    }
+}
+
+/**/
+/* timetable STYLE*/
+/**/
+.timetable header {
+    background: #008fd5;
+}
+.timetable .year {
+    background: #33a5dd;
+}
+.timetable .day .cal {
+    border-left-color: #008fd5;
+    color: #008fd5;
+}
+.timetable .switcher {
+    background: #33a5dd;
+}
+.timetable .switcher a:hover {
+    color: #008fd5;
+}
+.timetable .switcher .active {
+    background: #008fd5;
+}
+.timetable .month-view th {
+    color: #008fd5;
+}
+.timetable .month-view .title {
+    background: #008fd5;
+}
+.timetable .month-view .title + .date {
+    background: #4db1e2;
+}
+.timetable .month-view .popup {
+    background: #4db1e2;
+}
+.timetable .month-view .popup:after {
+    border-top-color: #4db1e2;
+}
+.timetable .month-view .popup .date {
+    background: rgba(255,255,255,0.3);
+}
+.timetable .month-view .event-container:hover {
+    background: #008fd5;
+}
+.timetable .week-view th {
+    color: #008fd5;
+    text-align: center;
+    min-width: 120px;
+}
+.timetable .week-view td:first-child i {
+    color: #008fd5;
+}
+.timetable .week-view .event-container:hover {
+    background: #008fd5;
+}
+.timetable .week-view .title {
+    background: #008fd5;
+}
+.timetable .week-view .popup {
+    background: #4db1e2;
+}
+.timetable .week-view .popup:after {
+    border-top-color: #4db1e2;
+}
+.timetable .list-view th {
+    color: #008fd5;
+}
+.timetable .list-view td i {
+    color: #008fd5;
+}
+.timetable .list-view .event-container:hover {
+    background: #008fd5;
+}
+.timetable .list-view .popup {
+    background: #4db1e2;
+}
+.timetable .list-view .popup:after {
+    border-top-color: #4db1e2;
+}
+.timetable .mobile-view dt span {
+    border-bottom-color: #008fd5;
+}
+.timetable .mobile-view li i {
+    color: #008fd5;
+}
+
+.td-time {
+    width: 5% !important;
+    min-width: 0px !important;
+    padding: 5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    font-size: 14px !important;
+    font-weight: 600;
+}
+
+.event-disabled {
+    background-color: gray;
+    min-height: 45px;
+    padding: 15px;
+    color: white;
+}
+
+.list-view tr td{
+    padding: 5px;
+}
+
+.event-daily {
+    margin: 0px;
+    border: 1px solid white;
+    padding: 5px;
+    background-color: #84c2ff;
+    color: white !important;
+    max-height: 56px;
+    min-height: 28px;
+    font-size: 9px;
+    font-family: sans-serif;
+}
+
+.event-daily:hover {
+    background-color: #33a5dd;
+}
+
+.timetable-daily .list-view .event-container:hover {
+    background-color: white !important;
+}
+
+.timetable-daily .list-view .event-container {
+    background-color: white;
+}
+
+.timetable-daily .list-view td:last-child {
+    min-height: 103px;
+}
+
+.list-view-alt tr{
+    height: 140px;
+}
+
+.list-view-alt tr td {
+    padding: 0px !important;
+}
+
+.timetable-daily .list-view .event {
+    padding: 0px !important;
+}
+
+.event .event-descpt {
+    padding:1px;
+}
+
+.event-daily .event-tit{
+    color: white !important;
+}
+
+.event-daily a {
+    text-decoration: none;
+    position: inherit !important;
+}
+
+.new-event {
+    background-color: #3b727d !important;
+    font-size: 11px;
+    color:#4cae4c;
+    text-align: center;
+}
+
+.icon-daily {
+    display:inline !important;
+    color:white !important;
+    font-size: 11px !important;
+}
+
+.webcal-box {
+    min-width: 189px;
+}
+
+
+.headcol {
+    position:absolute;
+    width:100px !important;
+    left:0;
+    top:auto;
+}
+
+
+/*
+    sticky styles
+*/
+.sticky-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.sticky-wrap .sticky-thead th{
+    color: #008fd5;
+    text-align: center;
+    width: 12.5%;
+    padding: 5px 0;
+    font-size: 12px;
+    line-height: 16px;
+    background-color: rgba(255, 255, 255, 0.89);
+    border-left: 1px solid #eaeaea;
+    border-right: 1px solid #eaeaea;
+}
+
+.sticky-wrap .sticky-thead th span {
+    color: #7c7c7c;
+}
+
+
+.sticky-wrap .sticky-thead,
+.sticky-wrap .sticky-col,
+.sticky-wrap .sticky-intersect {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /*transition: all 0.1s ease-in-out;*/
+    z-index: 50;
+    width: auto; /* Prevent table from stretching to full size */
+}
+.sticky-wrap .sticky-thead {
+    box-shadow: 0 0.25em 0.1em -0.1em rgba(0,0,0,.125);
+    z-index: 100;
+    width: 100%; /* Force stretch */
+}
+.sticky-wrap .sticky-intersect {
+    opacity: 1;
+    z-index: 150;
+
+}
+.sticky-wrap .sticky-intersect th {
+    background-color: #666;
+    color: #eee;
+}
+.sticky-wrap td,
+.sticky-wrap th {
+    box-sizing: border-box;
+}
+
+/* Not needed for sticky header/column functionality */
+td.user-name {
+    text-transform: capitalize;
+}
+

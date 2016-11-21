@@ -1,0 +1,591 @@
+<?php
+    /**
+     * Modelo de negocio TurnsBSN
+     *
+     * Acá se encuentra todo el modelo de negocios relacionado
+     * a la creación de turnos, configuraciones, etc
+     *
+     * @package      ZMed
+     * @subpackage   Turn Business
+     * @category     Turnos y configuraciones
+     * @author       Zenta Group
+     */
+
+
+    namespace App\Business;
+
+    use App\Models\TurnConfiguration;
+    use App\Models\Turns;
+    use App\Models\UsersSpecialtiesBranchoffices;
+    use Phalcon\Mvc\User\Plugin;
+
+    use App\Models\Users;
+    use App\Models\BranchOffices;
+    use App\Models\TurnCategories;
+    use App\Models\ConfirmationCategories;
+
+    /**
+     * Modelo de negocio
+     *
+     * Acá se encuentra todo el modelo de negocios relacionado
+     * a la creación de turnos, configuraciones, etc
+     *
+     * @author zenta group
+     */
+    class TurnBSN extends Plugin
+    {
+        /**
+         *
+         * @var array
+         */
+    	public 	$error;
+
+
+
+        /**
+         * Actualiza turno
+         *
+         * @author osanmartin
+         * @return boolean
+         */
+        public function updateTurn($turn){
+
+    		if($turn->update() == false)
+    		{
+    			foreach ($turn->getMessages() as $message) {
+    				$this->error[] = $message->getMessage();
+                }
+                return false;
+            } else{
+            	return true;
+            }    	
+        }	
+
+        /**
+         * Lista de estado turnos
+         *
+         * @author ssilvac
+         * @return object Listado
+         */
+        public function getTurnCategories() {
+
+            $turnc = TurnCategories::find();
+            return $turnc;
+        
+        }
+
+        /**
+         * estado turno
+         *
+         * @author jsilva
+         * @param $param['id']
+         * @return object Category
+         */
+        public function getTurnCategoriesBy($param)
+        {
+
+            $cat = TurnCategories::findFirst("id = " . $param["id"]);
+            return $cat;
+        }
+
+        /**
+         * Lista de estado turnos
+         *
+         * @author ssilvac
+         * @return object Listado
+         */
+        public function getTurnStates() {
+
+            $turnstates = TurnStates::find();
+            return $turnstates;
+        
+        }
+
+        /**
+         * getTurn
+         * 
+         * Devuelve un objeto turno
+         *
+         * @author osanmartin
+         * @param $param['turn_id']
+         * @param $param['datetime']
+         * @return object Turn
+         */
+
+        public function getTurn($param) {
+
+           if(isset($param['turn_id']))
+               return Turns::findFirstById($param['turn_id']);
+           elseif(isset($param['datetime']))
+               return Turns::findFirstByDatetimeTurn($param['datetime']);
+           else {
+              $this->error[] = 'No existe turno';
+               return false;
+           }
+        }
+
+        /**
+         * Trae las formas de confirmar
+         *
+         * @author rsoto
+         * @return objeto con las formas de confirmacion
+         */   
+
+        public function getConfirmationCategories(){
+
+        $confirmationCategories = ConfirmationCategories::find();
+
+        return $confirmationCategories;
+        }
+
+        /**
+         * Crea una nueva configuración
+         *
+         * @author ssilvac
+         *
+         * @param array $param
+         *
+         * Creacion de Configuración
+         *
+         * $param['config']['date_ini']
+         * $param['config']['date_end']
+         * $param['config']['hour_ini']
+         * $param['config']['hour_end']
+         * $param['config']['interval']
+         * $param['config']['days']
+         * $param['config']['hour_ini_restriction']
+         * $param['config']['hour_end_restriction']
+         *
+         * Creación de turno
+         *
+         * $param['turn']['especialty_id']      id especialidad
+         * $param['turn']['user_id']            id especialista
+         * $param['turn']['branch_office_id']   id sucursal
+         * 
+         * @return integer $id
+         */
+        public function createTurnConfiguration($param){
+
+            // Start a transaction
+            $this->db->begin();
+
+            try {
+
+
+                if( $id = $this->existTurnConfiguration($param) ){
+
+                    $this->error[] = $this->error->DUPLICATE_ELEMENT;
+                    $this->error['id_turn_configuration'] = 
+
+                    $this->db->rollback();
+
+                    return false;
+
+                }
+
+                echo "no existe conf";
+                return false;
+                die;
+
+
+                $configuracion = new TurnConfiguration();
+            
+                foreach ($param['config'] as $key => $val) {
+                    $configuracion->$key = $val;
+                }
+
+                if($configuracion->save() == false)
+                {
+                    foreach ($configuracion->getMessages() as $message) {
+                        $this->error[] = $message->getMessage();
+                    }
+
+                    // transaction rollback
+                    $this->db->rollback();
+
+                    return false;
+
+                } else {
+
+                    $lista_turnos = $this->generaTurnos(
+                        $configuracion->interval,
+                        $configuracion->days,
+                        $configuracion->date_ini,
+                        $configuracion->date_end,
+                        $configuracion->hour_ini,
+                        $configuracion->hour_end,
+                        $configuracion->hour_ini_restriction,
+                        $configuracion->hour_end_restriction
+                    );
+
+                    if(count($lista_turnos) == 0) {
+                        $this->error[] = $this->errors->NO_RECORDS_FOUND;
+                        $this->db->rollback();
+                        return false;
+                    }
+
+
+                    $usb_id = $this->getUSB(
+                        $param['turn']['especialty_id'],
+                        $param['turn']['user_id'],
+                        $param['turn']['branch_office_id']
+                    );
+
+                    foreach ($lista_turnos as $fecha => $horas) {
+                        foreach ($horas as $key => $hora ) {
+
+                            $datos_turn = array(
+                                'usb_id'                => $usb_id,
+                                'turn_configuration_id' => $configuracion->id,
+                                'turn_state_id'         => 1,
+                                'datetime_turn'             => $fecha." ".$hora
+                            );
+
+                            if( $this->createTurn($datos_turn) == false ) {
+
+                                $this->db->rollback();
+                                return false;
+
+                            }
+                        }
+                    }
+
+                    $this->db->commit();
+                    return $configuracion->id;
+                }
+                
+            } catch (Exception $e) {
+                $this->error[] = $e->getMessage();
+                $this->db->rollback();
+                return false;
+            }
+        }
+
+        /**
+         * Obtiene el usb_id
+         *
+         * @param integer $especialty_id    especialidad
+         * @param integer $user_id          especialista
+         * @param integer $branch_office_id sucursal
+         *
+         * @return integer ID usb
+         *
+         */
+        public function getUSB($especialty_id, $user_id, $branch_office_id) {
+
+            
+            $usb = UsersSpecialtiesBranchoffices::findFirst(
+                "   specialty_id    = {$especialty_id} 
+                AND user_id          = {$user_id}
+                AND branch_office_id = {$branch_office_id}"
+            );
+
+            return $usb->id;
+        }
+
+        /**
+         * genera los turnos
+         * 
+         * genera los turnos turno correspondientes
+         * 
+         * @param integer $duracion_turno
+         * @param string json $days
+         * @param date $date_ini
+         * @param date $date_end
+         * @param time $hour_ini
+         * @param time $hour_end
+         * @param time $hour_ini_restriction
+         * @param time $hour_end_restriction
+         *
+         * @return array Turnos
+         */
+        public function generaTurnos($duracion_turno, $days, $date_ini, $date_end, $hour_ini, $hour_end, $hour_ini_restriction, $hour_end_restriction) {
+            # Días configurados
+            $dias = json_decode( $days ); // devuelve objecto
+
+            # fecha de inicio y termino
+            $fecha_ini = new \DateTime($date_ini);
+            $fecha_fin = new \DateTime($date_end);
+
+            # generamos el intervalo de un día para recorrer
+            $interval = \DateInterval::createFromDateString('1 day');
+            $period = new \DatePeriod($fecha_ini, $interval, $fecha_fin);
+
+            $result = array();
+
+            foreach ( $period as $dt ) {
+
+                $num_dia = $dt->format( "N" ); //número de la semana correspondiente a la fecha ( lunes = 1 ... domingo = 7 )
+
+                if($dias->$num_dia) {
+
+                    // por defecto la fecha será la misma, solo cambia la hora
+                    $dia_a_recorrer_ini = new \DateTime( $dt->format( "Y-m-d {$hour_ini}" ) );
+                    $dia_a_recorrer_fin = new \DateTime( $dt->format( "Y-m-d {$hour_end}" ) );
+
+                    
+                    // generamos el intervalo en minutos
+                    $intervalo_diario   = new \DateInterval('PT'.$duracion_turno.'M');
+                    $periodo_diario     = new \DatePeriod($dia_a_recorrer_ini, $intervalo_diario, $dia_a_recorrer_fin);
+
+                    foreach ( $periodo_diario as $pd ) {
+
+                        $hora = $pd->format( "H:i:s" );
+
+                        if(! ($hora >= $hour_ini_restriction AND $hora < $hour_end_restriction) ) {
+                            $result[$pd->format("Y-m-d")][] = $pd->format("H:i:s");
+                        }
+                    }
+                }
+            }
+
+            return $result;
+        }
+
+        /**
+         * Crea un nuevo turno
+         *
+         * este metodo crea un nuevo turno
+         *
+         * @author ssilvac
+         *
+         * @param array $param
+         *
+         * @return integer $id en caso de éxito
+         * @return boolean false en case de fallar
+         */
+        public function createTurn($param){
+
+            try {
+
+                $turn = new Turns();
+            
+                foreach ($param as $key => $val) {
+                    $turn->$key = $val;
+                }
+
+                if($turn->save() == false)
+                {
+                    foreach ($turn->getMessages() as $message) {
+
+                        $this->error[] = $message->getMessage();
+                    }
+
+                    return false;
+
+                } else {
+                    return true;
+                }
+                
+            } catch (Exception $e) {
+                $this->error[] = $e->getMessage();
+                return false;
+            }
+        }
+
+        /**
+         * Verifica la configuracion
+         *
+         * comprobaremos si el especialista posee una configuracion de turno
+         * con los mismos datos o con horario ya ocupado
+         *
+         * Ejemplo de uso :
+         * 
+         *      if( $conf = $mh->existTurnConfiguration($param) ){
+         *          //existe un turno que calza
+         *          print_r($conf);//datos del turno e id de TurnConfiguration
+         *      }
+         *
+         * @author Sebastián Silva Carrasco
+         * @param array $param parametros de configuracion y turno
+         *
+         * @return integer $id identificador de configuracion
+         * @return boolean false si no existe configuracion existente
+         */
+        public function existTurnConfiguration($param) {
+
+            $conf = $param['config'];
+            $turn = $param['turn'];
+
+            $fecha_ini = new \DateTime($conf['date_ini']." {$conf['hour_ini']}");
+            $fecha_end = new \DateTime($conf['date_end']." {$conf['hour_end']}");
+
+            $sql = "SELECT t.datetime_turn, t.id, t.turn_configuration_id
+                    FROM App\Models\UsersSpecialtiesBranchoffices as usb 
+                    INNER JOIN App\Models\Turns as t ON t.usb_id = usb.id
+                    WHERE       usb.user_id = {$turn['user_id']}
+                        AND     ( YEAR(t.datetime_turn)     >= {$fecha_ini->format('Y')}    AND YEAR(t.datetime_turn)   <= {$fecha_end->format('Y')} )
+                        AND     ( MONTH(t.datetime_turn)    >= {$fecha_ini->format('m')}    AND MONTH(t.datetime_turn)  <= {$fecha_end->format('m')} )
+                        AND     ( DAY(t.datetime_turn)      >= {$fecha_ini->format('d')}    AND DAY(t.datetime_turn)    <= {$fecha_end->format('d')} )
+                        AND     ( HOUR(t.datetime_turn)     >= {$fecha_ini->format('H')}    AND HOUR(t.datetime_turn)   <= {$fecha_end->format('H')} ) ";
+
+            $queryResult = $this->modelsManager
+                                ->createQuery($sql)
+                                ->execute();
+
+            $days = json_decode($conf['days']);
+
+            foreach ($queryResult as $key => $value) {
+
+                $fecha = new \DateTime($value->datetime_turn);
+
+                $num = $fecha->format('N');
+
+                if( $days->$num ){
+
+                    return $value;
+
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Guarda los cambios realizados en un TurnConfiguration
+         *
+         * @author jcocina
+         * @param   un array con los campos de TurnConfiguration
+         *          por lo menos debe traer el id.
+         *          Los parametros pueden ser:
+         *              'date_ini'   date   inicio del periodo de validez de config
+         *              'date_end'   date   fin del periodo de validez de config
+         *              'hour_ini'   time   hora inicio jornada
+         *              'hour_end'   time   hora termino jornada
+         *              'interval'   int    duracion del turno (minutos)
+         *              'days'       string json con los días de la semana de la
+         *                                  config
+         *              'hour_ini_restriction'  time
+         *              'hour_end_restriction'  time
+         * @return  true si la operación fué realizada con exito
+         */
+        public function editConfiguration($param){
+            $turnConfiguration = TurnConfiguration::findFirst(
+                'where id = ' . $param['id']
+            );
+            if (!is_null($turnConfiguration) and $turnConfiguration != false) {
+                foreach ($param as $key => $value) {
+                    $turnConfiguration->$key = $value;
+                }
+                if ($turnConfiguration->update() == false) {
+                    //manejar errores
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                //manejar errores
+                return false;
+            }
+        }
+
+        /**
+         * Guarda los cambios realizados en un TurnConfiguration
+         *
+         * @author jcocina
+         * @param   id del TurnConfiguration a eliminar
+         * @return  true si la operación fué realizada con exito
+         */
+        public function deleteConfiguration($id){
+            $turnConfiguration = TurnConfiguration::findFirst(
+                'id = ' . $id
+            );
+            if (!is_null($turnConfiguration) and $turnConfiguration != false) {
+                if ($turnConfiguration->delete() == false) {
+                    //manejar errores
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                //manejar errores
+                return false;
+            }
+        }
+
+
+        /**
+        * Lista los TurnConfiguration según los parametros entregados
+        *
+        * @author jcocina
+        * @param   un array con los campos de TurnConfiguration
+        *          por lo menos debe traer el id.
+        *          Los parametros pueden ser:
+        *              'date_ini'   date   inicio del periodo de validez de config
+        *              'date_end'   date   fin del periodo de validez de config
+        *              'hour_ini'   time   hora inicio jornada
+        *              'hour_end'   time   hora termino jornada
+        *              'interval'   int    duracion del turno (minutos)
+        *              'days'       string json con los días de la semana de la
+        *                                  config
+        *              'hour_ini_restriction'  time
+        *              'hour_end_restriction'  time
+        *              'user_id'    int    id del especialista
+        *              'branch_office_id'   int     id de la sucursal
+        *              'specialty_id'       int     id de la especialidad
+        * @return  true si la operación fué realizada con exito
+        */
+        public function listConfigurations($param){
+            $usbParam = array();
+            if (isset($param['user_id'])) {
+               $usbParam['user_id'] = $param['user_id'];
+            }
+            if (isset($param['branch_office_id'])) {
+                $usbParam['branch_office_id'] = $param['branch_office_id'];
+            }
+            if (isset($param['specialty_id'])) {
+                $usbParam['specialty_id'] = $param['specialty_id'];
+            }
+
+
+            if (sizeof($usbParam) > 0) {
+                $first = true;
+                $where = '';
+                foreach ($usbParam as $key => $val) {
+                    if (!$first and sizeof($usbParam > 1)) {
+                        $where = $where . ' and';
+                    } else {
+                        $first = false;
+                    }
+                    $where = $where . ' ' . $key . ' = ' . $val;
+                }
+                $usersSpeBra = UsersSpecialtiesBranchoffices::find($where);
+                $result = array();
+                $where = '';
+                foreach ($param as $key => $val) {
+                    if ($key == 'user_id'
+                        or $key == 'branch_office_id'
+                        or $key == 'specialty_id') {
+                        continue;
+                    }
+                    $where = $where . ' and ' . $key . ' = ' . $val;
+                }
+                foreach ($usersSpeBra as $usb) {
+                    $tempResult = TurnConfiguration::find
+                        ('users_specialties_branchoffices_id = '.$usb->id . $where);
+                    if($tempResult != false) {
+                        array_push($result, $tempResult);
+                    }
+                }
+                return $result;
+            }
+            else {
+                $first = true;
+                $where = '';
+                foreach ($param as $key => $val) {
+                    if (!$first and sizeof($param > 1)) {
+                        $where = $where . ' and';
+                    } else {
+                        $first = false;
+                    }
+                    $where = $where . ' ' . $key . ' = ' . $val;
+                }
+                $turnConfiguration = TurnConfiguration::find($where);
+                return $turnConfiguration;
+            }
+        }
+    }
+
+
+
+

@@ -1,0 +1,158 @@
+<?php
+
+namespace App\Models;
+
+use Phalcon\Mvc\Model\Validator\Email as Email;
+
+class Users extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var string
+     */
+    public $username;
+
+    /**
+     *
+     * @var string
+     */
+    public $email;
+
+    /**
+     *
+     * @var string
+     */
+    public $avatar;
+
+    /**
+     *
+     * @var string
+     */
+    public $password;
+
+    /**
+     *
+     * @var integer
+     */
+    public $must_change_password;
+
+    /**
+     *
+     * @var string
+     */
+    public $banned;
+
+    /**
+     *
+     * @var string
+     */
+    public $suspended;
+
+    /**
+     *
+     * @var string
+     */
+    public $active;
+
+    /**
+     *
+     * @var integer
+     */
+    public $role_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $created_at;
+
+    /**
+     * Validations and business logic
+     *
+     * @return boolean
+     *
+    public function validation()
+    {
+        $this->validate(
+            new Email(
+                array(
+                    'field'    => 'email',
+                    'required' => true,
+                )
+            )
+        );
+
+        if ($this->validationHasFailed() == true) {
+            return false;
+        }
+
+        return true;
+    }
+
+    */
+
+
+    public function beforeValidationOnCreate()
+    {
+        $this->created_at = date('Y-m-d H:i:s');
+    }
+
+
+
+
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\Agreements', 'user_id', array('alias' => 'Agreements'));
+        $this->hasMany('id', __NAMESPACE__.'\Turns', 'user_patient_id', array('alias' => 'Turns'));
+        $this->belongsTo('id', __NAMESPACE__.'\UserDetails', 'user_id', array('alias' => 'UserDetails'));
+        $this->hasMany('id', __NAMESPACE__.'\UsersSpecialtiesBranchoffices', 'user_id', array('alias' => 'UsersSpecialtiesBranchoffices'));
+        $this->belongsTo('role_id', __NAMESPACE__.'\Roles', 'id', array('alias' => 'Roles'));
+
+        $this->belongsTo('sucursal', __NAMESPACE__.'\BranchOffices', 'id', array('alias' => 'BranchOffices'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'users';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Users[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Users
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

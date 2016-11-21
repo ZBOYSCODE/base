@@ -1,0 +1,91 @@
+<?php
+	
+	namespace App\Controllers;
+
+	use App\Models\Users;
+
+	use App\library\Auth\Exception as AuthException;
+	use App\library\Valida\Valida;
+
+	class PruebaController extends ControllerBase
+	{
+
+
+
+		
+
+		public function validaAction() {
+
+			$_post['nombre'] = "sebastian";
+
+			$valida = new Valida($_post, [
+				'nombre' => "required|string|min:2|max:5"
+			]);
+
+			if($valida->failed()){
+				echo "<pre>";
+				print_r($valida->errors);
+			}
+
+		}
+
+	    public function createUserAction()
+	    {	
+	       	$user = new Users();
+
+	       	$user->username 			= "ssilvac";
+	       	$user->email 				= "sebasilvac88@gmail.com";
+	       	$user->must_change_password	= 0;
+	       	$user->banned 				= 'N';
+	       	$user->suspended 			= 'N';
+	       	$user->active 				= 'Y';
+	       	$user->role_id 				= 1;
+	       	$user->password 			= $this->security->hash("admin");
+
+	       	
+	       	if ($user->save() == false) {
+			    echo "Umh, We can't store robots right now: \n";
+			    foreach ($user->getMessages() as $message) {
+			        echo $message, "\n";
+			    }
+			} else {
+			    echo "Great, a new robot was saved successfully!";
+			}
+	    }
+
+	    public function loginAction()
+	    {
+
+	    	$_post = array(
+	    		'email' => "sebasilvac88@gmail.com",
+          		'password' => "admin2",
+          		'remember' => true
+          	);
+
+			$valida = new Valida($_post, [
+				'email' 	=> "required|email",
+				'password'	=> "required|string|min:1"
+			]);
+
+			if($valida->failed()){
+				//print_r($valida->errors);
+				return false;
+			}
+
+	    	if ( $this->auth->check($_post) !== false ) { 
+	    		//echo "Usuario logeado";
+				return true;    	
+	    	} else {
+				//echo "Usuario no logeado";
+				return false;
+	    	}
+
+
+	    }
+
+	    public function showSessionVarAction()
+	    {	
+	    	echo "<pre>";
+	    	print_r($this->session->get('auth-identity'));
+	    }
+	}

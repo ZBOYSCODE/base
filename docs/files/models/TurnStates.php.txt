@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Models;
+
+class TurnStates extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var string
+     */
+    public $name_action;
+
+    /**
+     *
+     * @var string
+     */
+    public $name_state;
+
+
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\Turns', 'turn_state_id', array('alias' => 'Turns'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'turn_states';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return TurnStates[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return TurnStates
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

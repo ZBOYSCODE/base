@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
+    <title>API Documentation</title>
+    <meta name="author" content=""/>
+    <meta name="description" content=""/>
+
+    <link href="../css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/prism.css" rel="stylesheet" media="all"/>
+    <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
+    <!--[if lt IE 9]>
+    <script src="../js/html5.js"></script>
+    <![endif]-->
+    <script src="../js/jquery-1.11.0.min.js"></script>
+    <script src="../js/ui/1.10.4/jquery-ui.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery.smooth-scroll.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->
+    <script type="text/javascript">
+    function loadExternalCodeSnippets() {
+        Array.prototype.slice.call(document.querySelectorAll('pre[data-src]')).forEach(function (pre) {
+            var src = pre.getAttribute('data-src');
+            var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
+            var language = 'php';
+
+            var code = document.createElement('code');
+            code.className = 'language-' + language;
+
+            pre.textContent = '';
+
+            code.textContent = 'Loading…';
+
+            pre.appendChild(code);
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', src, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+
+                    if (xhr.status < 400 && xhr.responseText) {
+                        code.textContent = xhr.responseText;
+
+                        Prism.highlightElement(code);
+                    }
+                    else if (xhr.status >= 400) {
+                        code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+                    }
+                    else {
+                        code.textContent = '✖ Error: File does not exist or is empty';
+                    }
+                }
+            };
+
+            xhr.send(null);
+        });
+    }
+
+    $(document).ready(function(){
+        loadExternalCodeSnippets();
+    });
+    $('#source-view').on('shown', function () {
+        loadExternalCodeSnippets();
+    })
+</script>
+
+    <link rel="shortcut icon" href="../images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="../images/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="../images/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="../images/apple-touch-icon-114x114.png"/>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <i class="icon-ellipsis-vertical"></i>
+            </a>
+            <a class="brand" href="../index.html">API Documentation</a>
+
+            <div class="nav-collapse">
+                <ul class="nav pull-right">
+                                        <li class="dropdown">
+                        <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">
+                            API Documentation <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                                                        <li><a href="../namespaces/App.html">\App</a></li>
+                                                    </ul>
+                    </li>
+                                        <li class="dropdown" id="charts-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Charts <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../graphs/class.html">
+                                    <i class="icon-list-alt"></i>&#160;Class hierarchy diagram
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="reports-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Reports <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../reports/errors.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">494</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/markers.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/deprecated.html">
+                                                                                                            <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--<div class="go_to_top">-->
+    <!--<a href="#___" style="color: inherit">Back to top&#160;&#160;<i class="icon-upload icon-white"></i></a>-->
+    <!--</div>-->
+</div>
+
+<div id="___" class="container-fluid">
+        <section class="row-fluid">
+        <div class="span2 sidebar">
+                                <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-760156678"></a>
+                                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+            </div>
+            <div id="namespace-760156678" class="accordion-body collapse in">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-271539569"></a>
+                                <a href="../namespaces/App.html" style="margin-left: 30px; padding-left: 0">App</a>
+            </div>
+            <div id="namespace-271539569" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-491884085"></a>
+                                <a href="../namespaces/App.AccesoAcl.html" style="margin-left: 30px; padding-left: 0">AccesoAcl</a>
+            </div>
+            <div id="namespace-491884085" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.AccesoAcl.AccesoAcl.html">AccesoAcl</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1088143641"></a>
+                                <a href="../namespaces/App.Business.html" style="margin-left: 30px; padding-left: 0">Business</a>
+            </div>
+            <div id="namespace-1088143641" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.Business.AgendaBSN.html">AgendaBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.BranchOfficeBSN.html">BranchOfficeBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.MedicalHistoryBSN.html">MedicalHistoryBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.MedicalPlanBSN.html">MedicalPlanBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.PaymentBSN.html">PaymentBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.ProceduresBSN.html">ProceduresBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.SpecialtyBSN.html">SpecialtyBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.TurnBSN.html">TurnBSN</a></li>
+                                                    <li class="class"><a href="../classes/App.Business.UserBSN.html">UserBSN</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-472372685"></a>
+                                <a href="../namespaces/App.Controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
+            </div>
+            <div id="namespace-472372685" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.Controllers.AccesoController.html">AccesoController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.AgendamientoController.html">AgendamientoController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.AtencionController.html">AtencionController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.ControllerBase.html">ControllerBase</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.IndexController.html">IndexController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.InformeController.html">InformeController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.PacienteController.html">PacienteController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.PermisosController.html">PermisosController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.PruebaController.html">PruebaController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.SessionController.html">SessionController</a></li>
+                                                    <li class="class"><a href="../classes/App.Controllers.TestController.html">TestController</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1328370075"></a>
+                                <a href="../namespaces/App.library.html" style="margin-left: 30px; padding-left: 0">library</a>
+            </div>
+            <div id="namespace-1328370075" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1398250144"></a>
+                                <a href="../namespaces/App.library.Auth.html" style="margin-left: 30px; padding-left: 0">Auth</a>
+            </div>
+            <div id="namespace-1398250144" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Auth.Auth.html">Auth</a></li>
+                                                    <li class="class"><a href="../classes/App.library.Auth.Exception.html">Exception</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2132782077"></a>
+                                <a href="../namespaces/App.library.Constants.html" style="margin-left: 30px; padding-left: 0">Constants</a>
+            </div>
+            <div id="namespace-2132782077" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Constants.Constant.html">Constant</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1491651185"></a>
+                                <a href="../namespaces/App.library.Errors.html" style="margin-left: 30px; padding-left: 0">Errors</a>
+            </div>
+            <div id="namespace-1491651185" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Errors.Errors.html">Errors</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1763755588"></a>
+                                <a href="../namespaces/App.library.Mail.html" style="margin-left: 30px; padding-left: 0">Mail</a>
+            </div>
+            <div id="namespace-1763755588" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Mail.Exception.html">Exception</a></li>
+                                                    <li class="class"><a href="../classes/App.library.Mail.Mail.html">Mail</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1675075903"></a>
+                                <a href="../namespaces/App.library.Mifaces.html" style="margin-left: 30px; padding-left: 0">Mifaces</a>
+            </div>
+            <div id="namespace-1675075903" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Mifaces.Mifaces.html">Mifaces</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-628611020"></a>
+                                <a href="../namespaces/App.library.Valida.html" style="margin-left: 30px; padding-left: 0">Valida</a>
+            </div>
+            <div id="namespace-628611020" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.library.Valida.Valida.html">Valida</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-507735539"></a>
+                                <a href="../namespaces/App.Models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+            </div>
+            <div id="namespace-507735539" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.Models.Agreements.html">Agreements</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Benefits.html">Benefits</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.BranchOffices.html">BranchOffices</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Cities.html">Cities</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.ConfirmationCategories.html">ConfirmationCategories</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Districts.html">Districts</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.ExamState.html">ExamState</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.MedicalHistoryCommon.html">MedicalHistoryCommon</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.MedicalHistoryCommonExtra.html">MedicalHistoryCommonExtra</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.MedicalHistoryType.html">MedicalHistoryType</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.MedicalPlan.html">MedicalPlan</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.PaymentAgreements.html">PaymentAgreements</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.PaymentCategories.html">PaymentCategories</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.PaymentMethods.html">PaymentMethods</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Payments.html">Payments</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.PdfCreator.html">PdfCreator</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Permissions.html">Permissions</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.ProcedureBenefits.html">ProcedureBenefits</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Procedures.html">Procedures</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.RememberTokens.html">RememberTokens</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Roles.html">Roles</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Specialties.html">Specialties</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.SpecialtyCategories.html">SpecialtyCategories</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.TurnCategories.html">TurnCategories</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.TurnConfiguration.html">TurnConfiguration</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.TurnProcedures.html">TurnProcedures</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Turns.html">Turns</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.TurnStates.html">TurnStates</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.UserDetails.html">UserDetails</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.Users.html">Users</a></li>
+                                                    <li class="class"><a href="../classes/App.Models.UsersSpecialtiesBranchoffices.html">UsersSpecialtiesBranchoffices</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1486321987"></a>
+                                <a href="../namespaces/App.Plugins.html" style="margin-left: 30px; padding-left: 0">Plugins</a>
+            </div>
+            <div id="namespace-1486321987" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.Plugins.NotFoundPlugin.html">NotFoundPlugin</a></li>
+                                                    <li class="class"><a href="../classes/App.Plugins.SecurityPlugin.html">SecurityPlugin</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-25215391"></a>
+                                <a href="../namespaces/App.Utilities.html" style="margin-left: 30px; padding-left: 0">Utilities</a>
+            </div>
+            <div id="namespace-25215391" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/App.Utilities.Utility.html">Utility</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </section>
+    <section class="row-fluid">
+        <div class="span10 offset2">
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <nav>
+                                                <a href="../namespaces/App.Business.html">\App\Business</a> <i class="icon-level-up"></i>
+                                            </nav>
+                    <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal"><i class="icon-code"></i></a>
+
+                    <h1><small>\App\Business</small>AgendaBSN</h1>
+                    <p><em></em></p>
+                    
+                    
+                                        
+                    <section id="summary">
+                        <h2>Summary</h2>
+                        <section class="row-fluid heading">
+                            <section class="span4">
+                                <a href="#methods">Methods</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#properties">Properties</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#constants">Constants</a>
+                            </section>
+                        </section>
+                        <section class="row-fluid public">
+                            <section class="span4">
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_index" class="">index()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getDailyTurns" class="">getDailyTurns()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getWeeklyTurns" class="">getWeeklyTurns()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getDaysOfWeekTurn" class="">getDaysOfWeekTurn()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_editPatient" class="">editPatient()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getPaymentMethods" class="">getPaymentMethods()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_storeTurnSchedule" class="">storeTurnSchedule()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_blockTurnbyId" class="">blockTurnbyId()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_storeTurnConfirm" class="">storeTurnConfirm()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_storeTurnReception" class="">storeTurnReception()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_storeTurnPayment" class="">storeTurnPayment()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getTurnsAlternative" class="">getTurnsAlternative()</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#method_getAvailableSoonExamsByProcedureId" class="">getAvailableSoonExamsByProcedureId()</a><br />
+                                                            </section>
+                            <section class="span4">
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#property_error" class="">$error</a><br />
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No constants found</em>
+                                                            </section>
+                        </section>
+                        <section class="row-fluid protected">
+                            <section class="span4">
+                                                                    <em>No protected methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No protected properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                        <section class="row-fluid private">
+                            <section class="span4">
+                                                                    <em>No private methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#property_ROL_ESPECIALISTA" class="">$ROL_ESPECIALISTA</a><br />
+                                                                    <a href="../classes/App.Business.AgendaBSN.html#property_ROL_PACIENTE" class="">$ROL_PACIENTE</a><br />
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                    </section>
+                </div>
+                <aside class="span4 detailsbar">
+                                        
+                    
+                    <dl>
+                        <dt>File</dt>
+                            <dd><a href="../files/business.AgendaBSN.html"><div class="path-wrapper">business/AgendaBSN.php</div></a></dd>
+                                                <dt>Package</dt>
+                            <dd><div class="namespace-wrapper">Default</div></dd>
+                                                <dt>Class hierarchy</dt>
+                            <dd class="hierarchy">
+                                                                                                                                                                                                                                                                                                
+                                        <div class="namespace-wrapper">\Phalcon\Mvc\User\Plugin</div>
+                                                                                                    <div class="namespace-wrapper">\App\Business\AgendaBSN</div>
+                            </dd>
+
+                        
+                        
+                        
+                        
+                                                                        </dl>
+                    <h2>Tags</h2>
+                    <table class="table table-condensed">
+                                            <tr><td colspan="2"><em>None found</em></td></tr>
+                                        </table>
+                </aside>
+            </div>
+
+                        
+                                    <a id="properties" name="properties"></a>
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <h2>Properties</h2>
+                </div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_error" name="property_error" class="anchor"></a>
+            <article class="property">
+                <h3 class="public ">$error</h3>
+                <pre class="signature">$error : </pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_ROL_ESPECIALISTA" name="property_ROL_ESPECIALISTA" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$ROL_ESPECIALISTA</h3>
+                <pre class="signature">$ROL_ESPECIALISTA : </pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_ROL_PACIENTE" name="property_ROL_PACIENTE" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$ROL_PACIENTE</h3>
+                <pre class="signature">$ROL_PACIENTE : </pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                            
+                                    <a id="methods" name="methods"></a>
+            <div class="row-fluid">
+                <div class="span8 content class"><h2>Methods</h2></div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_index" name="method_index" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">index()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">index() </pre>
+                <p><em></em></p>
+                
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getDailyTurns" name="method_getDailyTurns" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getDailyTurns()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getDailyTurns(  <span class="argument">$param</span>) : \App\Business\objectList</pre>
+                <p><em>getDailyTurns</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \App\Business\objectList
+                                            &mdash; <p>$result : Lista de objetos necesarios para armar tabla de vista diaria.
+Si NO hay turnos con parametros ingresados</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Obtiene los turnos de un día en específico
+para un especialista de una especialidad y sucursal específicas,
+Devuelve a todos en caso no estar seteado el parámetro</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getWeeklyTurns" name="method_getWeeklyTurns" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getWeeklyTurns()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getWeeklyTurns(  <span class="argument">$param</span>) : \App\Business\objectList</pre>
+                <p><em>getWeeklytTurns</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \App\Business\objectList
+                                            &mdash; <p>$result : Lista de objetos necesarios para armar tabla de vista semanal.
+Si NO hay turnos con parametros ingresados</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Obtiene los turnos de una semana en específico
+para un especialista en específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getDaysOfWeekTurn" name="method_getDaysOfWeekTurn" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getDaysOfWeekTurn()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getDaysOfWeekTurn(  <span class="argument">$param</span>) : object</pre>
+                <p><em>getDaysOfWeekTurn</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    object
+                                            &mdash; <p>$result : Objeto estándar que tiene un array de los nombres de días de la semana involucrados
+Si NO hay turnos con parametros ingresados</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Obtiene los dias de la semana para una fecha en específico
+y para un especialista en específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_editPatient" name="method_editPatient" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">editPatient()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">editPatient(  <span class="argument">$userDetails</span>) </pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$userDetails </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getPaymentMethods" name="method_getPaymentMethods" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getPaymentMethods()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getPaymentMethods() : object</pre>
+                <p><em>Lista de formas de pago</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    object
+                                            &mdash; <p>Lista con formas de pago</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_storeTurnSchedule" name="method_storeTurnSchedule" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">storeTurnSchedule()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">storeTurnSchedule(  <span class="argument">$param</span>) : boolean</pre>
+                <p><em>storeTurnSchedule</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>true : update exitoso
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Realiza agendamiento de un paciente en un turno específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_blockTurnbyId" name="method_blockTurnbyId" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">blockTurnbyId()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">blockTurnbyId(  <span class="argument">$data</span>) : boolean</pre>
+                <p><em>blockTurnbyId</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$data </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>true: update exitoso
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>rsoto</p>
+<p>Realiza el bloqueo de un turno en especifico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_storeTurnConfirm" name="method_storeTurnConfirm" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">storeTurnConfirm()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">storeTurnConfirm(  <span class="argument">$param</span>) : boolean</pre>
+                <p><em>storeTurnConfirm</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>true : update exitoso
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Realiza confirmación de un paciente en un turno específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_storeTurnReception" name="method_storeTurnReception" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">storeTurnReception()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">storeTurnReception(  <span class="argument">$param</span>) : boolean</pre>
+                <p><em>storeTurnReception</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>true : update exitoso
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Realiza recepción de un paciente en un turno específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_storeTurnPayment" name="method_storeTurnPayment" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">storeTurnPayment()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">storeTurnPayment(  <span class="argument">$param</span>) : boolean</pre>
+                <p><em>storeTurnPayment</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>true : update exitoso
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Realiza el pago de un paciente para un turno específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getTurnsAlternative" name="method_getTurnsAlternative" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getTurnsAlternative()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getTurnsAlternative(  <span class="argument">$param</span>) : \App\Business\objectList</pre>
+                <p><em>getTurnsAlternative</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \App\Business\objectList
+                                            &mdash; <p>: lista de objetos turn
+Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>osanmartin</p>
+<p>Obtiene una cantidad determinada de turnos alternativos en base a un turno específico</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getAvailableSoonExamsByProcedureId" name="method_getAvailableSoonExamsByProcedureId" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getAvailableSoonExamsByProcedureId()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getAvailableSoonExamsByProcedureId(  <span class="argument">$param</span>) : \App\Business\objectList</pre>
+                <p><em>getAvaibleExamsByProcedureId</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$param </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \App\Business\objectList
+                                            &mdash; <p>: lista con los $limit turnos de examenes futuros disponibles
+On Fail</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>rsoto</p>
+<p>Obtiene una cantidad de examenes según su tipo</p>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                                                    </div>
+    </section>
+
+    <div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="source-view-label">AgendaBSN.php</h3>
+        </div>
+        <div class="modal-body">
+            <pre data-src="../files/business/AgendaBSN.php.txt" class="language-php line-numbers"></pre>
+        </div>
+    </div>
+
+    <footer class="row-fluid">
+        <section class="span10 offset2">
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <section class="row-fluid footer-sections">
+                        <section class="span4">
+                                                        <h1><i class="icon-code"></i></h1>
+                            <div>
+                                <ul>
+                                                                            <li><a href="../namespaces/App.html">\App</a></li>
+                                                                    </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-bar-chart"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../graphs/class.html">Class Hierarchy Diagram</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-pushpin"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../reports/errors.html">Errors</a></li>
+                                    <li><a href="../reports/markers.html">Markers</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+            </section>
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <hr />
+                    Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and authored
+                    on September 23rd, 2016 at 19:47.
+                </section>
+            </section>
+        </section>
+    </footer>
+</div>
+
+</body>
+</html>

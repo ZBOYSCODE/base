@@ -1,0 +1,59 @@
+<?php
+
+namespace App\library\Constants;
+
+use Phalcon\Mvc\User\Component;
+
+/**
+ * Clase para utilizar constantes para to_do el proyecto, utilizar con cautela.
+ * eg: $this->Constant->_getDateFormatFull($fecha);
+ * @package App\Constants
+ */
+
+class Constant extends Component
+{
+
+    private $days_full	= array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
+    private $days_mini	= array("Dom","Lun","Mar","Mie","Jue","Vie","Sáb");
+    private $months_full	= array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+    private $months_mini	= array("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic");
+
+
+	 function _getDayFull($param) {
+        return $this->days_full[$param];
+    }
+
+    function _getDayMini($param) {
+        return $this->days_mini[$param];
+    }
+
+    function _getMonthFull($param) {
+        return $this->months_full[$param];
+    }
+
+    function _getMonthMini($param) {
+        return $this->months_mini[$param];
+    }
+
+    function _getDateFormatFull($param){
+    	# formateamos la fecha
+    	$fecha_format = "{day_full} {day}, {month_full} del {year}";
+
+    	$day_full = $this->_getDayFull((int)date("w", strtotime($param)));
+    	$fecha_format = str_replace("{day_full}", $day_full, $fecha_format);
+
+    	$day = date("d", strtotime($param));
+    	$fecha_format = str_replace("{day}", $day, $fecha_format);
+
+    	$month = $this->_getMonthFull((int)date("m", strtotime($param)));
+    	$fecha_format = str_replace("{month_full}", $month, $fecha_format);
+
+    	$year = date("Y", strtotime($param));
+    	$fecha_format = str_replace("{year}", $year, $fecha_format);
+
+    	return $fecha_format;
+    }
+
+}
+
+?>

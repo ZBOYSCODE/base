@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Controllers;
+use Phalcon\Mvc\View\Engine\Volt\Compiler as VoltCompiler;
+
+
+class AtencionController extends ControllerBase
+{
+
+    public function indexAction()
+    {
+        $this->assets->addJs("js/pages/fake-atencion.js");
+        #vista
+        $this->view->pick("atencion/index");
+    }
+
+    public function createExamen() {
+
+
+
+    }
+
+}

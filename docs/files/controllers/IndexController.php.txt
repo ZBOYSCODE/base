@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Controllers;
+
+
+
+class IndexController extends ControllerBase
+{
+
+    public function indexAction()
+    {
+        $this->view->pick("home/index");
+    }
+
+}

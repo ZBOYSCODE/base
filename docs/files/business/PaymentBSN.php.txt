@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Business;
+use App\Models\Turns;
+use App\Models\UserDetails;
+use Phalcon\Mvc\User\Plugin;
+use App\Models\Users;
+use App\Models\BranchOffices;
+use App\Models\TurnStates;
+use App\Models\PaymentMethods;
+use App\Models\PaymentCategories;
+use App\Models\Benefits;
+use App\Models\Agreements;
+
+
+use App\Business\TurnBSN;
+
+
+class PaymentBSN extends Plugin
+{
+	public 	$error;
+
+
+
+    /**
+     * CreatePayment
+     * Crea un pago
+     *
+     * @author osanmartin
+     * @return integer id : id del pago creado
+     */
+    public function createPayment($payment){
+
+		if($payment->save() == false)
+		{
+			foreach ($payment->getMessages() as $message) {
+				$this->error[] = $message->getMessage();
+            }
+            return false;
+        } else{
+        	return $payment->id;
+        }    	
+    }	
+
+    /**
+     * createPaymentAgreement
+     *
+     * Registra convenio utilizado para un determinado pago
+     *
+     * @author osanmartin
+     * @return integer id de convenio
+     */
+    public function createPaymentAgreement($paymentAgreement){
+
+		if($paymentAgreement->save() == false)
+		{
+			foreach ($paymentAgreement->getMessages() as $message) {
+				$this->error[] = $message->getMessage();
+            }
+            return false;
+        } else{
+        	return $paymentAgreement->id;
+        }    	
+    }    	
+
+    /**
+     * getListPaymentCategories 
+     * 
+     * @author osanmartin
+     *
+     * Obtiene lista de objetos PaymentCategories / Categorías de Pago
+     * 
+     * @param object/array $param['data'] : datos de paciente o turno a actualizar/crear
+     * 
+     * @return objectList Lista de objetos PaymentCategories
+     */      	
+
+	public function getListPaymentCategories(){
+		return PaymentCategories::find();
+	}
+
+    /**
+     * getListBenefits 
+     * 
+     * @author osanmartin
+     *
+     * Obtiene lista de objetos Benefis / Prestaciones
+     *
+     * @return objectList Lista de objetos Benefits
+     */      		
+
+	public function getListBenefits(){
+		$result =  Benefits::find();	
+		if(empty($result)){
+			$this->error = "No se encontraron registros";
+			return false;
+		} 
+		return $result;
+	}
+
+    /**
+     * getListAgreements 
+     * 
+     * @author osanmartin
+     *
+     * Obtiene lista de objetos Agreements / Convenios
+     * 
+     * @param object/array $param['medical_plan_id'] : id de prevision
+     * @param object/array $param['user_id'] : id de especialista     
+     * 
+     * @return objectList Lista de objetos PaymentCategories
+     */      		
+
+	public function getListAgreements($param = null){
+		if(isset($param['medical_plan_id']) AND isset($param['user_id'])){
+			$result =  Agreements::find('medical_plan_id = '.$param['medical_plan_id'].' AND 
+									   user_id = '.$param['user_id']);	
+
+		} else{
+			$result =  Agreements::find();	
+			if(empty($result)){
+				$this->error = "No se encontraron registros";
+				return false;
+			} 
+		}
+
+		return $result;
+	}
+}

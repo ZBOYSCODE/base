@@ -1,0 +1,99 @@
+<?php
+	/**
+     * Modelo de negocio TurnsBSN
+     *
+     * Acá se encuentra todo el modelo de negocios relacionado
+     * a la creación de turnos, configuraciones, etc
+     *
+     * @package      ZMed
+     * @subpackage   Business
+     * @category     Medical History Business
+     * @author       Zenta Group
+     */
+
+	namespace App\Business;
+
+	use Phalcon\Mvc\User\Plugin;
+	use App\Models\MedicalHistoryType;
+	use App\Models\MedicalHistoryCommon;
+	use App\Models\MedicalHistoryCommonExtra;
+
+	/**
+     * Modelo de negocio Historia medica
+     *
+     * Acá se encuentra todo el modelo de negocios relacionado
+     * a la historia medica del paciente
+     *
+     * @author zenta group
+     */
+	class MedicalHistoryBSN extends Plugin
+	{
+		/**
+         *
+         * @var array Listado de errores
+         */
+    	public 	$error;
+
+    	/**
+    	 * Tipos de Historia medica
+    	 *
+    	 * devuelve los tipos o especialidades de la historia medica
+    	 *
+    	 * @author Sebastián Silva Carrasco
+    	 * @return object $list Tipos de historia medica
+    	 */
+    	public function getListMedicalHistoryType() {
+
+    		$list = MedicalHistoryType::find();
+    		return $list;
+
+    	}
+
+    	/**
+    	 * Tipos de Historia medica
+    	 *
+    	 * en este caso filtramos los tipos por especialidad
+    	 *
+    	 * @author Sebastián Silva Carrasco
+    	 * @param integer $speciality Id especialidad
+    	 */
+    	public function getListMedicalHistoryTypeBySpeciality($speciality){
+
+    		$list = MedicalHistoryType::findBySpecialtyId($speciality);
+    		return $list;
+    	}
+
+    	/**
+    	 * Linea de tiempo
+    	 *
+    	 * retornamos los datos necesarios para la creación el timeline del paciente
+    	 *
+    	 * @author Sebastián Silva Carrasco
+    	 * @param integer $user_id ID Paciente
+    	 * @param string $order_by Orden de los resultados
+    	 */
+    	public function getTimeline($user_id, $order_by = 'ASC') {
+
+    		$common = MedicalHistoryCommon::find(array(
+    			"user_patient_id = {$user_id}",
+    			"order" => " created_at {$order_by}"
+    		));
+
+    		return $common;
+    	}
+
+    	/**
+    	 * Medical hitory Common by ID
+    	 *
+    	 * retornamos los datos comunes by id
+    	 *
+    	 * @author Sebastián Silva Carrasco
+    	 * @param integer $id ID
+    	 */
+    	public function getMedicalHistoryCommonById($id) {
+
+    		$common = MedicalHistoryCommon::findFirstById($id);
+    		return $common;
+    	}
+
+	}

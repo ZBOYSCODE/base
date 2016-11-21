@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Models;
+
+
+class MedicalHistoryType extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var string
+     */
+    public $name;
+
+    /**
+     *
+     * @var integer
+     */
+    public $specialty_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $icon;
+
+    /**
+     *
+     * @var string
+     */
+    public $view_input;
+
+    /**
+     *
+     * @var string
+     */
+    public $view_timeline;
+
+    /**
+     *
+     * @var string
+     */
+    public $view_print;
+
+    /**
+     *
+     * @var string
+     */
+    public $table_name;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'MedicalHistoryCommon', 'medical_history_type_id', array('alias' => 'MedicalHistoryCommon'));
+        $this->belongsTo('specialty_id', __NAMESPACE__.'Specialties', 'id', array('alias' => 'Specialties'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'medical_history_type';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryType[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryType
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

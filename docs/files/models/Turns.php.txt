@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Models;
+
+class Turns extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $usb_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $turn_category_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $turn_state_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $user_patient_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $datetime_turn;
+
+    /**
+     *
+     * @var string
+     */
+    public $datetime_reception;
+
+    /**
+     *
+     * @var string
+     */
+    public $datetime_attention;
+
+    /**
+     *
+     * @var integer
+     */
+    public $overcrowd;
+
+    /**
+     *
+     * @var string
+     */
+    public $comments;    
+
+    /**
+     *
+     * @var string
+     */
+    public $created_at;
+
+    public function beforeValidationOnCreate()
+    {
+        $this->created_at = date('Y-m-d H:i:s');
+    }
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\Payments', 'turn_id', array('alias' => 'Payments'));
+        $this->hasMany('id', __NAMESPACE__.'\TurnProcedures', 'turn_id', array('alias' => 'TurnProcedures'));
+
+        $this->belongsTo('usb_id', __NAMESPACE__.'\UsersSpecialtiesBranchoffices', 'id', array('alias' => 'UsersSpecialtiesBranchoffices'));
+        $this->belongsTo('turn_category_id', __NAMESPACE__.'\TurnCategories', 'id', array('alias' => 'TurnCategories'));
+        $this->belongsTo('turn_state_id', __NAMESPACE__.'\TurnStates', 'id', array('alias' => 'TurnStates'));
+        $this->belongsTo('user_patient_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+        $this->belongsTo('confirmation_category_id', __NAMESPACE__.'\confirmation_categories', 'id', array('alias' => 'ConfirmationCategories'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'turns';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Turns[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Turns
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

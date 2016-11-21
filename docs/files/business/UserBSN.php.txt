@@ -1,0 +1,580 @@
+<?php
+
+namespace App\Business;
+
+use App\Models\Users;
+use App\Models\UserDetails;
+use App\Models\Roles;
+use App\Models\MedicalPlan;
+use App\Models\UsersSpecialtiesBranchoffices;
+use App\Models\Cities;
+use App\Models\Districts;
+use App\Models\Specialties;
+
+use Phalcon\Mvc\User\Plugin;
+use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+
+use App\library\Valida\Valida;
+
+/*
+ * Limite por defecto a los elementos por pagina
+ */
+define("DEFAULT_PAGE_LIMIT", 10);
+
+/*
+ * Clase diseñada para realizar consultas sobre Users y UserDetails
+ *
+ * @author      jcocina
+ *
+ */
+class UserBSN extends Plugin
+{
+    private $ROL_ESPECIALISTA   = 3;
+    private $ROL_PACIENTE       = 4;
+
+    public $error = array();
+    /*
+     * Obtiene la lista de los usuarios con su informacion, puede ser entregada
+     * paginada o sin paginar
+     *
+     * Para paginacion revisar:
+     * https://docs.phalconphp.com/es/latest/api/Phalcon_Paginator_Adapter_Model.html
+     *
+     * @author      jcocina
+     * @param   array   $conditions
+     *                      'pagination'    bool    determina si el resultado se
+     *                                              debe paginar
+     *                      'limit'         int     es la cantidad de elementos
+     *                                              por pagina, si no se envia
+     *                                              se toma el por defecto
+     *                      'page'          int     es la pagina que debe ser
+     *                                              retornada, si no se envia
+     *                                              por defecto es 1
+     *                      'role'          int     id del Rol de la lista de
+     *                                              usuarios
+     *                                              de no ser especificado se
+     *                                              traen todos
+     *
+     * @return  array   la lista de Users con sus UserDetails
+     */
+    public function index($conditions)
+    {
+        extract($conditions);
+
+        $where = " WHERE 1=1 ";
+
+        $query = 'select App\Models\Users.id, email, firstname, lastname, rut, 
+                  username, avatar, name as role, active, suspended, banned, location, phone_fixed, phone_mobile, medical_plan_id
+                  from App\Models\Users
+                  left join App\Models\UserDetails 
+                  on App\Models\Users.id = App\Models\UserDetails.user_id';
+                  
+        if (isset($role)) {
+            $query = $query . ' join App\Models\Roles 
+                    on App\Models\Users.role_id = App\Models\Roles.id';
+
+            $where .= ' AND App\Models\Roles.id = "' . $role . '" ';
+        }
+
+        if(isset($search)) {
+
+            $where .= " AND (firstname like '%{$search}%' ";
+            $where .= " OR lastname like '%{$search}%' ";
+            $where .= " OR email like '%{$search}%' ";
+            $where .= " OR username like '%{$search}%' ";
+            $where .= " OR rut like '%{$search}%' ) ";
+
+        }
+
+
+        $queryResult = $this->modelsManager->createQuery($query.$where)
+            ->execute();
+
+        if (isset($pagination) and $pagination) {
+            if (!isset($limit))
+            {
+                $limit = DEFAULT_PAGE_LIMIT;
+            }
+            if (!isset($page))
+            {
+                $page = 1;
+            }
+            $paginator = new PaginatorModel(
+                    array(
+                        'data' => $queryResult,
+                        'limit' => $limit,
+                        'page' => $page
+                    )
+                );
+            return $paginator->getPaginate();
+        }
+        else {
+            return $queryResult;
+        }
+    }
+
+    /*
+     * Obtiene el primer usuario que se corresponda con los parametros
+     * entregados
+     *
+     * @author  jcocina
+     * @param   array   $conditions
+     *                      'id'        int    Id del uauario que se desea
+     *                                         encontrar
+     *                      'username'  String username o email del usuario
+     * Ambos parametros no deben ser nulos
+     *
+     * @return  Users   Usuario con la correspondencia
+     *          null    En caso de error
+     */
+    public function show($conditions){
+
+        extract($conditions);
+
+        /*
+        if (!isset($id) and !isset($username)){
+            return null;
+        }*/
+
+        $queryResult = $this->modelsManager->createBuilder()
+            ->from('App\Models\Users')
+            ->leftjoin('App\Models\UserDetails')
+            ->where('1 = 1');
+
+        if (isset($id))
+        {
+            $queryResult = $queryResult
+                ->andwhere(
+                    'App\Models\Users.id = :id:',
+                    array('id' => $id)
+                );
+        }
+
+        if (isset($username))
+        {
+           $queryResult = $queryResult
+               ->andwhere(
+                    'username = :username: or email = :email:',
+                    array('username' => $username, 'email' => $username)
+                );
+        }
+
+        $queryResult = $queryResult
+            ->createQuery()
+            ->getSingleResult();
+        return $queryResult;
+    }
+    /*
+     * Actualiza los datos de un usuario
+     *
+     * @param array param
+     *          (
+     *              int     id
+     *              String  firstname
+     *              String  lastname
+     *              String  rut
+     *              String  location
+     *              String  phone_fixed
+     *              String  phone_mobile
+     *          )
+     * @return true     en caso de que el update sea correcto
+     *         false    en caso de error
+     */
+    public function editUserDetails($param){
+        // CASO 1: Si $userDetails es un objeto
+
+        if(is_object($param)){
+            $userDetails = $param;
+            if (strpos(get_class($userDetails), 'UserDetails')){
+
+                if ($userDetails->save() == false)
+                {
+                    foreach ($userDetails->getMessages() as $message) {
+                        $this->error[] = $message->getMessage();
+                    }
+                    return false;
+                } else{
+                    return true;
+                }
+            }
+        }
+
+
+        // CASO 2: $userDetails es un array
+
+        $user = UserDetails::findFirst($param['user_id']);
+
+        foreach ($param as $key => $val) {
+            $user->$key = $val;
+        }
+
+        if ($user->save() == false)
+        {
+            foreach ($user->getMessages() as $message) {
+                $this->error[] = $message->getMessage();
+            }
+        } else{
+            return true;
+        }
+    }
+
+    /*
+     * getListSpecialistUSB
+     *
+     * Obtiene objetos USB que permiten acceder a especialistas
+     * 
+     * @author osanmartin
+     *
+     * @param integer $data['branchOffice_id'] : id de la sucursal seleccionada
+     * @param integer $data['specialty_id'] : id de la especialidad seleccionada
+     *
+     *
+     * @return objectList lista de objetos USB si es exitoso
+     *         boolean    false    en caso de error
+     */    
+
+
+    public function getListSpecialistUSB($data){
+
+        if(is_null($data['branchOffice_id']) or empty($data['branchOffice_id'])) {
+            $this->error[] = "Se necesita la id de sucursal";
+            return false;
+        }
+
+        if(is_null($data['specialty_id']) or empty($data['specialty_id'])) {
+            $this->error[] = "Se necesita la id de especialidad";
+            return false;
+        }        
+
+        $result = UsersSpecialtiesBranchoffices::find('branch_office_id = '.$data["branchOffice_id"].' AND 
+                                             specialty_id = '.$data["specialty_id"]);
+        return $result;
+    }
+
+
+
+    /**
+     * Lista de especialistas
+     *
+     * @author ssilvac
+     * @return object 
+     */
+    public function getSpecialist($id = null) {
+
+        if(is_null($id) or empty($id)) {
+            $this->error = "Se necesita el Id";
+            return false;
+        }
+
+        $arg = array("
+                 role_id = {$this->ROL_ESPECIALISTA} 
+             AND banned = 'N' 
+             AND suspended = 'N' 
+             AND active = 'Y' 
+             AND id = ".(int)$id );
+
+        $specialist = Users::findFirst($arg);
+        
+        return $specialist;
+    }
+
+     /**
+     * obtener paciente
+     *
+     * @author ssilvac
+     * @param array $param
+     * $param puede traer los siguientes datos
+     * $para['id']
+     * $para['firstname']
+     * $para['rut']
+     *
+     * @return object Listado de pacientes
+     */
+    public function getPatient($param) {
+
+        $arg = "    App\Models\Users.role_id = {$this->ROL_PACIENTE} 
+                AND App\Models\Users.banned = 'N' 
+                AND App\Models\Users.suspended = 'N' 
+                AND App\Models\Users.active = 'Y'";
+
+        if( isset($param['id']) and !empty($param['id']) ) {
+            $arg .= " AND App\Models\Users.id = ".(int)$param['id'];
+        }
+
+        if( isset($param['firstname']) and !empty($param['firstname']) ) {
+            $arg .= " AND App\Models\UserDetails.firstname like '%".$param['firstname']."%' ";
+        }
+
+        if( isset($param['rut']) and !empty($param['rut']) ) {
+            $arg .= " AND App\Models\UserDetails.rut like '%".$param['rut']."%' ";
+        }
+
+        $result = $this->modelsManager->createBuilder()
+                    ->from('App\Models\Users')
+                    ->leftjoin('App\Models\UserDetails')
+                    ->leftjoin('App\Models\MedicalPlan')
+                    ->columns('
+                            App\Models\Users.id as iduser, 
+                            App\Models\Users.username,
+                            App\Models\Users.email,
+                            App\Models\Users.avatar,
+                            App\Models\Users.created_at,
+                            App\Models\UserDetails.firstname,
+                            App\Models\UserDetails.lastname,
+                            App\Models\UserDetails.location,
+                            App\Models\UserDetails.phone_fixed,
+                            App\Models\UserDetails.phone_mobile,
+                            App\Models\MedicalPlan.name as medical_plan,
+                            App\Models\UserDetails.medical_plan_id,
+                            App\Models\UserDetails.comments,
+                            App\Models\UserDetails.rut')
+                    ->where($arg)
+                    ->getQuery()
+                    ->getSingleResult();
+
+        return $result;
+    }
+
+    /**
+     * Lista de especialidades
+     *
+     * @author ssilvac
+     * @param integer $category Id Categoria
+     * @return object Listado de categorias
+     */
+    public function getListSpecialties($category = null) {
+
+        if(!is_null($category)) {
+
+            $specialities = Specialties::findBySpecialtyCategoryId($category);
+
+        } else { 
+
+            $specialities = Specialties::find();
+        }
+
+        return $specialities;
+    }
+    
+    /**
+     * Lista de especialistas
+     *
+     * @author ssilvac
+     * @return object Listado de categorias
+     */
+    public function getListSpecialists() {
+
+        $arg = array("
+                 role_id = {$this->ROL_ESPECIALISTA} 
+             AND banned = 'N' 
+             AND suspended = 'N' 
+             AND active = 'Y' 
+        ");
+
+        $specialist = Users::find($arg);
+        
+        return $specialist;
+    }
+
+    /**
+     * Lista de pacientes
+     *
+     * @author ssilvac
+     * @return object Listado de pacientes
+     */
+    public function getListPatients() {
+
+        $arg = array("
+                 role_id = {$this->ROL_PACIENTE} 
+             AND banned = 'N' 
+             AND suspended = 'N' 
+             AND active = 'Y' 
+        ");
+
+        $patients = Users::find($arg);
+        
+        return $patients;
+    }
+
+    /**
+     * Lista de pacientes
+     *
+     * @author ssilvac
+     * @return object Listado de pacientes
+     */
+    public function getAvatarUser($email) {
+
+        $arg = array("
+            email like '%{$email}%' 
+        ");
+
+        $user = Users::findFirst($arg);
+        
+        if( $user === false ){
+        
+            return false;
+        
+        } else {
+
+            return $user->avatar;
+        
+        }
+
+    }
+
+    /**
+     * crea usuario
+     *
+     * @author ssilvac
+     * @param array $param
+     * @return integer $id
+     */
+    public function createUser($param) {
+
+        if( isset($param['id']) and !empty($param['id']) ){
+
+            $user = Users::findFirst($param['id']);
+
+        } else {
+            $user = new Users();
+        }
+        
+
+        foreach ($param as $key => $val) {
+            $user->$key = $val;
+        }
+
+        if($user->save() == false)
+        {
+            foreach ($user->getMessages() as $message) {
+
+                $this->error[] = $message->getMessage();
+            }
+
+            return false;
+
+        } else {
+            return $user->id;
+        }
+    }
+
+    /**
+     * crea detalle usuario
+     *
+     * @author ssilvac
+     * @param array $param
+     * @return integer $id
+     */
+    public function createUserDetail($param) {
+
+        if( isset($param['id']) and !empty($param['id']) ){
+
+            $user = UserDetails::findFirst($param['id']);
+
+        } else {
+            $user = new UserDetails();
+        }
+        
+
+        foreach ($param as $key => $val) {
+            $user->$key = $val;
+        }
+
+        if($user->save() == false)
+        {
+            foreach ($user->getMessages() as $message) {
+
+                $this->error[] = $message->getMessage();
+            }
+
+            return false;
+
+        } else {
+            return $user->user_id;
+        }
+
+    }
+
+    /**
+     * Lista de pacientes
+     *
+     * @author ssilvac
+     * @return object Listado de pacientes
+     */
+    public function deleteUser($id) {
+
+        if(is_null($id) or empty($id)) {
+            $this->error[] = "Se neecsita el ID";
+            return false;
+        }
+
+        $user = new Users();
+        $user->active = 'N';
+
+        if($user->update() == false)
+        {
+            foreach ($user->getMessages() as $message) {
+                
+                $this->error[] = $message->getMessage();
+            }
+
+            return false;
+
+       } else {
+           return true;
+       }
+    }
+
+    /**
+     * Trae comunas por region
+     *
+     * @author rsoto
+     * @param  int $districtId. Id de la region deseada
+     * @return array $citiesByDistricts. Devuelve las comunas por region o false si existen en la region.
+     */
+
+    public function getCitiesByDistricts($districtId){
+
+
+        $citiesByDistricts = Cities::find('districts_id = '.$districtId.' ORDER BY name');  
+
+        if(empty($citiesByDistricts)){
+
+            $citiesByDistricts=false;
+            $this->error[]= "No se encuentran comunas en la región seleccionada";
+
+        }
+
+
+        return $citiesByDistricts;   
+
+    }
+
+    /**
+     * Trae regiones
+     *
+     * @author rsoto
+     * @return array $districts. Devuelve un array con las regiones ordenadas geograficamente.
+     */
+
+    public function getDistricts(){
+
+
+        $districts = Districts::find(array(
+            "order" => "order_num"
+        ));
+
+        if(empty($districts)){
+
+            $districts=false;
+            $this->error[]= "No se encuentran regiones";
+
+        }
+
+
+        return $districts;   
+
+    }
+
+}
+

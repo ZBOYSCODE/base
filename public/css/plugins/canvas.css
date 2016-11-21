@@ -1,0 +1,22 @@
+canvas{
+    cursor: crosshair;
+    border: #555 solid 3px;
+    border-radius: 3px;
+ }
+#clr div{
+    cursor:pointer;
+    width:20px;
+    height:20px;
+    float: left;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+button{
+    margin-left: 10px;
+    background-color: #555;
+    color: white;
+    border:none;
+    padding:5px;
+    border-radius: 3px;
+}
+

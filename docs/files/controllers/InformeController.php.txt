@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Controllers;
+use Phalcon\Mvc\View\Engine\Volt\Compiler as VoltCompiler;
+
+
+class InformeController extends ControllerBase
+{
+
+    public function indexAction()
+    {
+        #css custom
+        $this->assets->addCss('css/custom-alt.css');
+        #vista
+        $this->view->pick("informe/index");
+    }
+
+}

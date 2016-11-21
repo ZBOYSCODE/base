@@ -1,0 +1,39 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Jorge Cociña
+ * Date: 14-09-2016
+ * Time: 3:11
+ */
+
+namespace App\Business;
+
+use App\Models\Specialties;
+use Phalcon\Mvc\User\Plugin;
+
+class SpecialtyBSN extends Plugin
+{
+    /*
+     * Permite obtener la lista de especialidades disponibles en una sucursal
+     *
+     * @param String branch     id de la sucursal
+     * @return Lista de especialidades
+     */
+    public function getByBranchoffice($branch){
+
+        $query = "SELECT DISTINCT(App\Models\Specialties.id) id,
+                  name,
+                  specialty_category_id
+                  from App\Models\Specialties
+                  join App\Models\UsersSpecialtiesBranchoffices
+                   on specialty_id = App\Models\Specialties.id
+                   where branch_office_id = ".$branch;
+
+
+
+        $result = $this->modelsManager->createQuery($query)->execute();
+
+
+        return $result;
+    }
+}

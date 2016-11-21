@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Models;
+
+class UsersSpecialtiesBranchoffices extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $branch_office_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $user_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $specialty_id;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\Turns', 'usb_id', array('alias' => 'Turns'));
+        $this->belongsTo('specialty_id', __NAMESPACE__.'\Specialties', 'id', array('alias' => 'Specialties'));
+        $this->belongsTo('branch_office_id', __NAMESPACE__.'\BranchOffices', 'id', array('alias' => 'BranchOffices'));
+        $this->belongsTo('user_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'users_specialties_branchoffices';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return UsersSpecialtiesBranchoffices[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return UsersSpecialtiesBranchoffices
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

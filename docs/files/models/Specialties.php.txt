@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Models;
+
+class Specialties extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $specialty_category_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $name;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\UsersSpecialtiesBranchoffices', 'specialty_id', array('alias' => 'UsersSpecialtiesBranchoffices'));
+        $this->belongsTo('specialty_category_id', __NAMESPACE__.'\SpecialtyCategories', 'id', array('alias' => 'SpecialtyCategories'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'specialties';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Specialties[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Specialties
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

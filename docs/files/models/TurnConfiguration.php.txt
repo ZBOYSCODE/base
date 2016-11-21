@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Models;
+
+class TurnConfiguration extends \Phalcon\Mvc\Model
+{
+
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->belongsTo('users_specialties_branchoffices_id', __NAMESPACE__.'\UsersSpecialtiesBranchoffices', 'id', array('alias' => 'UsersSpecialtiesBranchoffices'));
+        $this->belongsTo('turn_categories_id', __NAMESPACE__.'\TurnCategories', 'id', array('alias' => 'turnCategory'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'turn_configuration';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return BranchOffices[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return BranchOffices
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

@@ -1,0 +1,150 @@
+<?php
+
+	namespace App\Business;
+
+	use Phalcon\Mvc\User\Plugin;
+	use App\Models\Procedures;
+	use App\Models\ProcedureBenefits;
+	use App\Models\TurnProcedures;
+
+
+
+	class ProceduresBSN extends Plugin
+	{
+		public 	$error;
+
+
+		/**
+		 * Obtiene el listado
+		 *
+		 * @author Sebastián Silva C
+		 *
+		 * @return object listado 
+		 */
+
+		public function getProceduresBeneffits() {
+
+			$proc = ProcedureBenefits::find();
+        	return $proc;
+		}
+
+		/**
+		 * Obtiene un registro
+		 *
+		 * @author Sebastián Silva C
+		 *
+		 * @return object  
+		 */
+		public function getProcedureBeneffit($id) {
+
+			if( !isset($id) or empty($id) ) {
+	            $this->error[] = $this->errors->MISSING_PARAMETERS;
+	            return false;
+	        }
+
+
+	        try {
+
+	            $proc = ProcedureBenefits::findFirst($id);
+        		return $proc;
+	            
+	        } catch (Exception $e) {
+	            $this->error[] = $e->getMessage();
+	            return false;
+	        }
+
+			
+		}
+
+		/**
+		 * Obtiene el listado
+		 *
+		 * @author Sebastián Silva C
+		 *
+		 * @return object listado 
+		 */
+		public function getTurnProcedures() {
+
+			$proc = TurnProcedures::find();
+        	return $proc;
+		}
+
+		/**
+		 * Obtiene un registro
+		 *
+		 * @author Sebastián Silva C
+		 *
+		 * @return object
+		 */
+		public function getTurnProcedure($id) {
+
+			if( !isset($id) or empty($id) ) {
+	            $this->error[] = $this->errors->MISSING_PARAMETERS;
+	            return false;
+	        }
+
+
+	        try {
+
+	            $proc = TurnProcedures::findFirst($id);
+        		return $proc;
+	            
+	        } catch (Exception $e) {
+	            $this->error[] = $e->getMessage();
+	            return false;
+	        }
+
+	    }
+
+
+		/**
+		 * Obtiene un listado de Procedimientos
+		 *
+		 * @author rsoto
+		 *
+		 * @return object listado con procedimientos 
+		 */
+
+		public function getProcedures(){
+
+			$procedures = Procedures::find();
+			return $procedures;
+
+		}
+
+		/**
+		 * Obtiene un Procedimiento por su id
+		 *
+		 * @author rsoto
+		 *
+		 * @return object listado con procedimientos 
+		 */
+
+		public function getProcedure($id) {
+
+			if( !isset($id) or empty($id) ) {
+	            $this->error[] = $this->errors->MISSING_PARAMETERS;
+	            return false;
+	        }
+
+	        try {
+
+	            $proc = Procedures::findFirst($id);
+        		return $proc;
+	            
+	        } catch (Exception $e) {
+	            $this->error[] = $e->getMessage();
+	            return false;
+	        }
+
+			
+		}
+
+		
+
+
+
+	}
+
+	
+

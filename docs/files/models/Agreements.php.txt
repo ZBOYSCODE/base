@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Models;
+
+class Agreements extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $benefit_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $medical_plan_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $user_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $price;            
+
+    /**
+     *
+     * @var integer
+     */
+    public $bonus;                
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\PaymentAgreements', 'agreement_id', array('alias' => 'PaymentAgreements'));        
+        $this->belongsTo('benefit_id', __NAMESPACE__.'\Benefits', 'id', array('alias' => 'Benefits'));
+        $this->belongsTo('medical_plan_id', __NAMESPACE__.'\MedicalPlan', 'id', array('alias' => 'MedicalPlan'));
+        $this->belongsTo('user_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'agreements';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Agreements[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Agreements
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

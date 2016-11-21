@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Business;
+use App\Models\Turns;
+use App\Models\UserDetails;
+use Phalcon\Mvc\User\Plugin;
+use App\Models\Users;
+use App\Models\BranchOffices;
+use App\Models\TurnStates;
+use App\Models\PaymentMethods;
+use App\Models\MedicalPlan;
+use App\Business\TurnBSN;
+
+
+class MedicalPlanBSN extends Plugin
+{
+	public 	$error;
+
+	/**
+	 * Lista de previsiones
+	 *
+     * @author osanmartin
+	 * @return object Listado de previsiones
+	 */	
+	public function getListMedicalPlan(){
+		return MedicalPlan::find();
+	}
+
+
+
+}
+

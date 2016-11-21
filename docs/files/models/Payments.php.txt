@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Models;
+
+class Payments extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $total;
+
+    /**
+     *
+     * @var integer
+     */
+    public $turno_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $medical_plan_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $payment_category_id;    
+
+    /**
+     *
+     * @var string
+     */
+    public $created_at;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\PaymentAgreements', 'payment_id', array('alias' => 'PaymentAgreements'));        
+        $this->hasMany('id', __NAMESPACE__.'\PaymentDetails', 'payment_id', array('alias' => 'PaymentDetails'));
+        $this->belongsTo('turno_id', __NAMESPACE__.'\Turns', 'id', array('alias' => 'Turns'));
+        $this->belongsTo('medical_plan_id', __NAMESPACE__.'\MedicalPlan', 'id', array('alias' => 'MedicalPlan'));
+        $this->belongsTo('payment_category_id', __NAMESPACE__.'\PaymentCategories', 'id', array('alias' => 'PaymentCategories'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'payments';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Payments[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return Payments
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+    public function beforeValidation()
+    {
+        $dt = new \DateTime();
+        $this->created_at = $dt->format('Y-m-d H:i:s');
+        
+    }
+
+}
+

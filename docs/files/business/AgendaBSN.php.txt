@@ -1,0 +1,850 @@
+<?php
+
+namespace App\Business;
+use App\Models\Turns;
+use App\Models\UserDetails;
+use Phalcon\Mvc\User\Plugin;
+use App\Models\Users;
+use App\Models\BranchOffices;
+use App\Models\TurnStates;
+use App\Models\PaymentMethods;
+use App\Models\Payments;
+use App\Models\PaymentAgreements;
+use App\Models\TurnProcedures;
+
+
+use App\Business\TurnBSN;
+
+
+class AgendaBSN extends Plugin
+{
+	private $ROL_ESPECIALISTA 	= 3;
+	private $ROL_PACIENTE 		= 4;
+
+	public 	$error;
+
+
+    public function index()
+    {
+
+    	$result = $this->modelsManager->createBuilder()
+                    ->from('App\Models\Turns')
+                    ->columns('*')
+                    ->getQuery()
+                    ->execute();   	
+
+
+    }
+
+	/**
+	 * getDailyTurns 
+	 *
+	 * @author osanmartin
+	 *
+	 * Obtiene los turnos de un día en específico
+	 * para un especialista de una especialidad y sucursal específicas, 
+	 * Devuelve a todos en caso no estar seteado el parámetro
+	 * 
+	 *
+	 * @param integer $param['usb_id'] : id de combinacion especialista,sucursal,especialidad
+	 * @param date $param['date'] : fecha de la cual obtener los turnos
+	 * @param integer $param['specialty_id'] : id de especialidad seteada
+	 * @param integer $param['branchOffice_id'] : id de sucursal seteada
+	 *
+	 * Si hay turnos con parametros ingresados
+	 * @return objectList $result : Lista de objetos necesarios para armar tabla de vista diaria.
+	 * Si NO hay turnos con parametros ingresados
+	 * @return array $result : retorna array vacío
+	 * Si falta un parametro
+	 * @return boolean false
+	 */    
+
+    public function getDailyTurns($param){
+
+    	if(is_null($param['date']) or empty($param['date'])) {
+    		$this->error[] = "Se necesita la fecha";
+    		return false;
+    	}
+
+    	$date = new \DateTime($param['date']);
+    	
+		$phql = "SELECT t.id idTurn,t.turn_state_id,t.datetime_turn,
+						t.datetime_reception,t.datetime_attention,
+					    t.overcrowd,
+					    s.name as nameSpecialty,
+					    b.name as nameBranchOffice,
+					    u.username as usernameSpecialist,
+					    usb.user_id as idSpecialist,
+					    ud.firstname as firstnameSpecialist, ud.lastname as lastnameSpecialist,
+                        pd.user_id as idPatient,
+					    pd.firstname as firstnamePatient, pd.lastname as lastnamePatient,
+					    pd.location as locationPatient, pd.phone_fixed as phoneFixedPatient,
+					    pd.rut as rutPatient,
+					    pd.phone_mobile as phoneMobilePatient,
+					    pd.user_id patientId,
+					    p.avatar as avatarPatient,
+					    mp.name as nameMedicalPlan,
+					    ts.name_action as nameAction, ts.id as idTurnState, ts.name_state as nameState,
+					    tc.name as nameTurnCategory
+		    		FROM App\Models\Turns t
+				 	LEFT JOIN App\Models\UsersSpecialtiesBranchoffices usb ON usb.id = t.usb_id 
+				 	LEFT JOIN App\Models\Specialties s ON usb.specialty_id = s.id 
+				 	LEFT JOIN App\Models\BranchOffices b ON usb.branch_office_id = b.id 
+				 	LEFT JOIN App\Models\Users u ON usb.user_id = u.id 
+				 	LEFT JOIN App\Models\Users p ON t.user_patient_id = p.id
+				 	LEFT JOIN App\Models\UserDetails ud ON ud.user_id = u.id 
+				 	LEFT JOIN App\Models\UserDetails pd ON pd.user_id = p.id 
+				 	LEFT JOIN App\Models\MedicalPlan mp ON pd.medical_plan_id = mp.id 
+				 	LEFT JOIN App\Models\TurnStates ts ON t.turn_state_id = ts.id 
+				 	LEFT JOIN App\Models\TurnCategories tc ON t.turn_category_id = tc.id 
+				 	";
+
+
+		$phql = $phql. " WHERE DATE_FORMAT(t.datetime_turn,'%Y-%m-%d') = '{$date->format('Y-m-d')}'";
+
+		if(isset($param['usb_id']))
+			$phql = $phql." AND usb.id = {$param['usb_id']} ";
+		elseif (isset($param['specialty_id']) AND isset($param['branchOffice_id'])) {
+			$phql = $phql." AND s.id = {$param['specialty_id']} 
+							AND b.id = {$param['branchOffice_id']}";
+		} else{
+			$this->error[] = "Se necesitan ids de especialidad y sucursal";
+			return false;
+		}
+
+		$phql = $phql . " ORDER BY t.datetime_turn ASC ";
+
+    	$result = $this->modelsManager->createQuery($phql)
+    		  ->execute();
+
+
+    	
+
+
+    	return $result;
+    }
+
+
+	/**
+	 * getWeeklytTurns 
+	 *
+	 * @author osanmartin
+	 *
+	 * Obtiene los turnos de una semana en específico
+	 * para un especialista en específico
+	 * 
+	 *
+	 * @param integer $param['usb_id'] : id de combinacion especialista,sucursal,especialidad
+	 * @param date $param['date'] : fecha de la cual obtener los turnos
+	 *
+	 * Si hay turnos con parametros ingresados
+	 * @return objectList $result : Lista de objetos necesarios para armar tabla de vista semanal.
+	 * Si NO hay turnos con parametros ingresados
+	 * @return array $result : retorna array vacío
+	 * Si falta un parametro
+	 * @return boolean false	 
+	 */        
+
+
+    public function getWeeklyTurns($param){
+
+    	if(is_null($param['date']) or empty($param['date'])) {
+    		$this->error[] = "Se necesita la fecha";
+    		return false;
+    	}
+
+    	if(is_null($param['usb_id']) or empty($param['usb_id'])) {
+    		$this->error[] = "Se necesita id de usuario-especialidad-sucursal (usb)";
+    		return false;
+    	}    	
+
+    	$date = new \DateTime($param['date']);
+    	
+		$phql = "SELECT t.id idTurn,
+                        t.turn_state_id,
+                        t.datetime_turn,
+                        t.datetime_reception,t.datetime_attention,
+                        t.overcrowd,
+                        s.name as nameSpecialty,
+                        b.name as nameBranchOffice,
+                        u.username as usernameSpecialist,
+                        usb.user_id as idSpecialist,
+                        ud.firstname as firstnameSpecialist, ud.lastname as lastnameSpecialist,
+                        pd.user_id as idPatient,
+                        pd.firstname as firstnamePatient, pd.lastname as lastnamePatient,
+                        pd.location as locationPatient, pd.phone_fixed as phoneFixedPatient,
+                        pd.rut as rutPatient,
+                        pd.phone_mobile as phoneMobilePatient,
+                        pd.user_id patientId,
+                        p.avatar as avatarPatient,
+                        mp.name as nameMedicalPlan,
+                        ts.name_action as nameAction, ts.id as idTurnState, ts.name_state as nameState,
+                        tc.name as nameTurnCategory
+
+		    		FROM App\Models\Turns t
+				 	LEFT JOIN App\Models\UsersSpecialtiesBranchoffices usb ON usb.id = t.usb_id 
+				 	LEFT JOIN App\Models\Specialties s ON usb.specialty_id = s.id 
+				 	LEFT JOIN App\Models\BranchOffices b ON usb.branch_office_id = b.id 
+				 	LEFT JOIN App\Models\Users u ON usb.user_id = u.id 
+				 	LEFT JOIN App\Models\Users p ON t.user_patient_id = p.id
+				 	LEFT JOIN App\Models\UserDetails ud ON ud.user_id = u.id 
+                    LEFT JOIN App\Models\UserDetails pd ON pd.user_id = p.id 
+                    LEFT JOIN App\Models\MedicalPlan mp ON pd.medical_plan_id = mp.id 
+				 	LEFT JOIN App\Models\TurnStates ts ON t.turn_state_id = ts.id 
+				 	LEFT JOIN App\Models\TurnCategories tc ON t.turn_category_id = tc.id ";
+
+
+		$phql = $phql. " WHERE YEARWEEK(t.datetime_turn) = YEARWEEK('{$date->format('Y-m-d')}') ";
+
+		$phql = $phql." AND usb.id = {$param['usb_id']} ";
+
+		$phql = $phql . " ORDER BY t.datetime_turn ASC ";
+
+    	$result = $this->modelsManager->createQuery($phql)
+    		  ->execute();
+
+
+	    $order_result = [];
+
+    	foreach ($result as $value) {
+    		$hora = date("H:i",strtotime($value->datetime_turn));
+    		$fecha = date("Y-m-d",strtotime($value->datetime_turn));
+    		$order_result[$hora][$fecha] = $value;
+    	}
+
+        ksort($order_result);
+
+
+    	return $order_result;    	
+    }
+
+
+	/**
+	 * getDaysOfWeekTurn 
+	 * @author osanmartin
+	 *
+	 * Obtiene los dias de la semana para una fecha en específico
+	 * y para un especialista en específico
+	 * 
+	 *
+	 * @param integer $param['usb_id'] : id de combinacion especialista,sucursal,especialidad
+	 * @param date $param['date'] : fecha de la cual obtener los turnos
+	 *
+	 * Si hay turnos con parametros ingresados
+	 * @return object $result : Objeto estándar que tiene un array de los nombres de días de la semana involucrados
+	 * Si NO hay turnos con parametros ingresados
+	 * @return array $result : retorna array vacío
+	 * Si falta un parametro
+	 * @return boolean false	 
+	 */   
+
+    public function getDaysOfWeekTurn($param){
+
+        	if(is_null($param['date']) or empty($param['date'])) {
+        		$this->error[] = "Se necesita la fecha";
+        		return false;
+        	}
+
+        	if(is_null($param['usb_id']) or empty($param['usb_id'])) {
+        		$this->error[] = "Se necesita id de especialista-especialidad-sucursal (usb)";
+        		return false;
+        	}    	    	
+
+        	$date = new \DateTime($param['date']);
+        	
+    		$phql = "SELECT WEEKDAY(t.datetime_turn) as weekDay, datetime_turn
+    		         	FROM App\Models\Turns t 
+    				 	LEFT JOIN App\Models\UsersSpecialtiesBranchoffices usb ON usb.id = t.usb_id 
+    				 	LEFT JOIN App\Models\Users u ON usb.user_id = u.id 
+    		         	";
+
+
+    		$phql = $phql. " WHERE YEARWEEK(t.datetime_turn,1) = YEARWEEK('{$date->format('Y-m-d')}',1) ";
+
+    		$phql = $phql." AND usb.id = {$param['usb_id']} ";
+    		$phql = $phql . " GROUP BY weekDay ";
+    		$phql = $phql . " ORDER BY t.datetime_turn ASC ";
+
+
+        	$result = $this->modelsManager->createQuery($phql)
+        		  ->execute();
+
+        	// PENDIENTE Agregar como variable global o simialrs
+    		$dias_full	= array("Lunes","Martes","Miercoles","Jueves","Viernes","Sábado","Domingo");
+    		if(count($result) > 0){
+    			$days = new \StdClass();
+    			foreach ($result as $val) {
+    				$resultDays->days[] = [$dias_full[$val->weekDay],$val->datetime_turn];
+    			}
+
+    			return $resultDays;
+    		}
+
+        	return $result;    	    	
+        }
+
+    
+
+    
+
+   
+
+    
+
+    
+
+    /*
+     * Actualiza los datos de un paciente
+     *
+     * @param array userDetails
+     *          (
+     *              int     id
+     *              String  firstname
+     *              String  lastname
+     *              String  rut
+     *              String  location
+     *              String  phone_fixed
+     *              String  phone_mobile
+     *          )
+     * @return true     en caso de que el update sea correcto
+     *         false    en caso de error
+     */
+    public function editPatient($userDetails){
+        if (strpos(get_class($userDetails), 'UserDetails')){
+
+            if ($userDetails->save() == false)
+            {
+                foreach ($userDetails->getMessages() as $message) {
+                    $this->error[] = $message->getMessage();
+                }
+            } else{
+                return true;
+            }
+        }
+        extract($userDetails);
+        $user = new UserDetails();
+        if (isset($id)) {
+            $user->id = $id;
+        } else {
+            return false;
+        }
+        if (isset($firstname)) {
+            $user->firstname = $firstname;
+        }
+        if (isset($lastname)) {
+            $user->lastname = $lastname;
+        }
+        if (isset($rut)) {
+            $user->rut = $rut;
+        }
+        if (isset($location)) {
+            $user->location = $location;
+        }
+        if (isset($phone_fixed)) {
+            $user->phone_fixed = $phone_fixed;
+        }
+        if (isset($phone_mobile)) {
+            $user->phone_mobile = $phone_mobile;
+        }
+        if ($user->save() == false)
+        {
+            foreach ($user->getMessages() as $message) {
+                $this->error[] = $message->getMessage();
+            }
+        } else{
+            return true;
+        }
+    }
+    
+    
+    /**
+	 * Lista de formas de pago
+	 *
+	 * @return object Lista con formas de pago 
+	 */
+
+    public function getPaymentMethods(){
+
+    	$paymentMethods = PaymentMethods::find();
+    	return $paymentMethods;
+
+    }
+
+    /**
+     * storeTurnSchedule 
+     * 
+     * @author osanmartin
+     *
+     * Realiza agendamiento de un paciente en un turno específico
+     * 
+     *
+     * @param boolean $param['create'] : true en caso de querer crear
+     * @param int $param['turn_id'] : id de turno a actualizar
+     * @param object/array $param['data'] : datos de paciente o turno a actualizar/crear
+     * @param string required $param['data']['email'] : email de user
+     * 
+     *
+     * Success
+     * @return boolean true : update exitoso
+     * Fail
+     * @return boolean false : falló update
+     */
+    public function storeTurnSchedule($param) {
+
+        $this->db->begin();
+
+        $userBSN = new UserBSN();
+        $turnBSN = new TurnBSN();
+
+        if(is_null($param['turn_id']) or empty($param['turn_id'])) {
+            $this->error[] = "Se necesita id del turno ";
+            return false;
+        }
+
+        // Activada creación de paciente
+        if(isset($param['create'])){
+            $paramPatient['role_id'] = $this->ROL_PACIENTE;
+            $paramPatient['email'] = $param['data']['email'];
+            $result = $userBSN->createUser($paramPatient);
+
+            if(!$result) {$this->error[] = $userBSN->error; return false;}
+
+            $patient_id = $result;
+
+            $paramUserDetail = array(
+                    'user_id' => $patient_id,
+                    'firstname' => $param['data']['firstname'],
+                    'lastname' => $param['data']['lastname'],
+                    'rut' => $param['data']['rut'],
+                    'location' => $param['data']['location'],
+                    'phone_fixed' => $param['data']['phone_fixed'],
+                    'phone_mobile' => $param['data']['phone_mobile'],
+                    'medical_plan_id' => $param['data']['medical_plan_id']
+                );
+
+            $result = $userBSN->createUserDetail($paramUserDetail);
+
+            if(!$result){ $this->error[] = $userBSN->error; $this->db->rollback; return $result;}  
+
+        } else{
+
+            if(!isset($param['data']['patient_id'])) {
+                $this->error[] = "Se necesita id del paciente ";
+                return false;
+            }               
+
+            $paramUserDetail = array(
+                    'user_id' => $param['data']['patient_id'],
+                    'phone_fixed' => $param['data']['phone_fixed'],
+                    'phone_mobile' => $param['data']['phone_mobile'],
+                    'medical_plan_id' => $param['data']['medical_plan_id']
+
+            );            
+            
+            $result = $userBSN->editUserDetails($paramUserDetail);
+            $patient_id = $param['data']['patient_id'];
+
+            // Si falla editUserDetails
+            if(!$result){ $this->error[] = $userBSN->error; $this->db->rollback; return $result;}            
+        }
+
+        $turn = Turns::findFirstById($param['turn_id']);
+        $turn->user_patient_id = $patient_id;
+
+
+        $turn->turn_category_id = $param["data"]["turn_category_id"];
+        $turn->comments = $param["data"]["comments"];
+
+        $turn->turn_state_id = 2;
+
+        
+        $result = $turnBSN->updateTurn($turn);
+
+
+        // Si falla updateTurn
+        if(!$result){$this->error[] = $turnBSN->error; $this->db->rollback; return $result;}
+
+        if($result)
+            $this->db->commit();
+
+        return $result;
+    }   
+
+    /**
+     * blockTurnbyId 
+     * 
+     * @author rsoto
+     *
+     * Realiza el bloqueo de un turno en especifico
+     * 
+     * @param integer $data: id de turno a bloquear
+     * 
+     * 
+     *
+     * Success
+     * @return boolean true: update exitoso
+     * Fail
+     * @return boolean false: falló update
+     */      
+
+    public function blockTurnbyId($data){
+
+        $turnBSN = new TurnBSN();
+
+        if(is_null($data) or empty($data)) {
+            $this->error[] = "Se necesita id del turno ";
+            return false;
+        }
+
+        $turn = Turns::findFirstById($data);
+
+        if(!empty($turn)){
+
+            $turn->turn_state_id = 100;
+            $result = $turnBSN->updateTurn($turn);
+
+            if($result==1){
+                $result = true;
+
+            }else{    
+                $result = false;
+            }
+        }else{
+            $this->error[]= "Se necesita un turno válido";
+            $result =false;
+
+        }
+
+        return $result;
+
+    }  
+
+
+    /**
+     * storeTurnConfirm
+     * 
+     * @author osanmartin
+     *
+     * Realiza confirmación de un paciente en un turno específico
+     * 
+     * @param date $param['turn_id'] : id de turno a actualizar
+     * @param object/array $param['data'] : datos de paciente o turno a actualizar
+     * 
+     *
+     * Success
+     * @return boolean true : update exitoso
+     * Fail
+     * @return boolean false : falló update
+     */  
+
+    public function storeTurnConfirm($param){
+        $this->db->begin();
+
+        $userBSN = new UserBSN();
+        $turnBSN = new TurnBSN();
+
+        if(is_null($param['turn_id']) or empty($param['turn_id'])) {
+            $this->error[] = "Se necesita id del turno ";
+            return false;
+        }
+
+
+        $turn = Turns::findFirstById($param['turn_id']);
+
+        $turn->turn_state_id = 3;
+        $turn->comments = $param['data']['comments'];
+        $turn->turn_category_id = $param["data"]["turn_category_id"];
+
+        
+        $result = $turnBSN->updateTurn($turn);
+
+
+        // Si falla updateTurn
+        if(!$result){ $this->error[] = $turnBSN->error; return $result;}
+
+        if(is_null($param['data']['patient_id']) or empty($param['data']['patient_id'])) {
+            $this->error[] = "Se necesita id del paciente ";
+            return false;
+        }               
+
+        $paramUser = array('email' => $param['data']['email']);
+
+        // falta editUser
+
+        $paramUserDetail = array(
+                'user_id' => $param['data']['patient_id'],
+                'phone_fixed' => $param['data']['phone_fixed'],
+                'phone_mobile' => $param['data']['phone_mobile'],
+                'medical_plan_id' => $param['data']['medical_plan_id']
+
+        );  
+        
+        $result = $userBSN->editUserDetails($paramUserDetail);
+        // Si falla editUserDetails
+        if(!$result){ $this->error[] = $userBSN->error; $this->db->rollback; return $result;}  
+
+        if($result)
+            $this->db->commit();
+
+        return $result;     
+    }
+
+    /**
+     * storeTurnReception
+     * 
+     * @author osanmartin
+     *
+     * Realiza recepción de un paciente en un turno específico
+     * 
+     * @param date $param['turn_id'] : id de turno a actualizar
+     * @param object/array $param['data'] : datos de paciente o turno a actualizar
+     * 
+     *
+     * Success
+     * @return boolean true : update exitoso
+     * Fail
+     * @return boolean false : falló update
+     */  
+
+    public function storeTurnReception($param){
+
+        $this->db->begin();
+
+        $userBSN = new UserBSN();
+        $turnBSN = new TurnBSN();
+
+        if(is_null($param['turn_id']) or empty($param['turn_id'])) {
+            $this->error[] = "Se necesita id del turno ";
+            return false;
+        }
+
+        $turn = Turns::findFirstById($param['turn_id']);
+        $turn->turn_state_id = 4;
+
+        
+        $result = $turnBSN->updateTurn($turn);
+        // Si falla updateTurn
+        if(!$result){ $this->error[] = $turnBSN->error; $this->db->rollback(); return $result;}
+
+        if(is_null($param['data']['patient_id']) or empty($param['data']['patient_id'])) {
+            $this->error[] = "Se necesita id del paciente ";
+            return false;
+        }               
+
+        $param['data']['user_id'] = $param['data']['patient_id'];
+        
+        $result = $userBSN->editUserDetails($param['data']);
+        // Si falla editUserDetails
+        if(!$result){ $this->error[] = $userBSN->error; $this->db->rollback(); return $result;}  
+
+        if($result)
+            $this->db->commit();
+
+        return $result;         
+    } 
+
+
+
+
+    /**
+     * storeTurnPayment
+     * 
+     * @author osanmartin
+     *
+     * Realiza el pago de un paciente para un turno específico
+     * 
+     * @param date $param['turn_id'] : id de turno a actualizar
+     * @param object/array $param['data'] : datos de pago
+     * @param array  $param['agreements'] : id(s) de convenios utilizados para el pago
+     * 
+     *
+     * Success
+     * @return boolean true : update exitoso
+     * Fail
+     * @return boolean false : falló update
+     */  
+
+    public function storeTurnPayment($param){
+
+        $this->db->begin();
+
+        $paymentBSN = new PaymentBSN();
+        $turnBSN = new TurnBSN();
+
+
+        if(!isset($param['turn_id'])) {
+            $this->error[] = "Se necesita id del turno ";
+            return false;
+        }
+
+        // validar param
+
+        $turn = Turns::findFirstById($param['turn_id']);
+        if($turn == false){
+            $this->error[] = "No se encontraron registros";
+            return false;
+        }
+        $turn->turn_state_id = 5;
+
+        
+        $result = $turnBSN->updateTurn($turn);
+        // Si falla updateTurn
+        if(!$result){ $this->error[] = $turnBSN->error; $this->db->rollback(); return $result;}
+
+        // Se genera pago (total se calculó previamente)
+
+        $payment = new Payments();
+        $payment->total = $param['data']['total'];
+        $payment->turn_id = $turn->id;
+        $payment->medical_plan_id = $param['data']['medical_plan_id'];
+        $payment->payment_category_id = $param['data']['payment_category_id'];
+
+        
+        $result = $paymentBSN->createPayment($payment);
+        if(!$result){ $this->error[] = $paymentBSN->error; $this->db->rollback(); return $result;}
+
+        foreach ($param['agreements'] as $val) {
+            $paymentAgreement = new PaymentAgreements();
+            $paymentAgreement->agreement_id = $val;
+            $paymentAgreement->payment_id = $payment->id;
+            $result = $paymentBSN->createPaymentAgreement($paymentAgreement);
+            if(!$result){ 
+                $this->error[] = $paymentBSN->error; $this->db->rollback(); return $result;
+            }
+        }
+
+        if($result)
+            $this->db->commit();
+
+        return $result;         
+    } 
+
+
+
+
+
+    /**
+     * getTurnsAlternative
+     * 
+     * @author osanmartin
+     *
+     * Obtiene una cantidad determinada de turnos alternativos en base a un turno específico
+     * 
+     * @param integer $param['turn_id'] : id de turno 
+     * @param integer $param['count'] : cantidad de turnos alternativos a obtener
+     * 
+     *
+     * Success
+     * @return objectList : lista de objetos turn
+     * Fail
+     * @return boolean false : no hay turnos alternativos
+     */  
+
+    public function getTurnsAlternative($param){
+        
+        //validar count
+
+        $result = Turns::find('datetime_turn > '.$param['turn_id'].' 
+                     AND turn_state_id = 1
+                     ORDER BY datetime_turn ASC 
+                     LIMIT '.$param['count']);
+        //validar result
+
+        return $result;
+    }
+
+
+    /**
+     * getAvaibleExamsByProcedureId
+     * 
+     * @author rsoto
+     *
+     * Obtiene una cantidad de examenes según su tipo
+     * 
+     * 
+     * @param array $param['date'], $param['procedure_id'], $param['limit']
+     * 
+     *
+     * On Success
+     * @return objectList : lista con los $limit turnos de examenes futuros disponibles
+     * On Fail
+     * @return boolean false : no hay turnos examen disponibles
+     */  
+
+
+    public function getAvailableSoonExamsByProcedureId($param){
+
+
+        if(is_null($param['date']) or empty($param['date'])) {
+                    $this->error[] = "Se necesita la fecha";
+                    return false;
+                }
+        if(is_null($param['procedure_id']) or empty($param['procedure_id'])) {
+                    $this->error[] = "Se necesita una id de procedimiento";
+                    return false;
+                }
+        if(is_null($param['limit']) or empty($param['limit'])) {
+                    $this->error[] = "Se necesita una cantidad limite de registros";
+                    return false;
+                }
+
+
+
+        $date = new \DateTime($param['date']);
+        $procedureId= $param['procedure_id'];
+        $limit = $param['limit'];
+        
+        $phql = "SELECT t.id idTurn,t.turn_state_id,t.datetime_turn,
+                        usb.user_id as idSpecialist,
+                        ud.firstname as firstnameSpecialist, ud.lastname as lastnameSpecialist,
+                        ts.name_action as nameAction, ts.id as idTurnState, ts.name_state as nameState,
+                        pr.name as nameProcedure
+                        
+                    FROM App\Models\TurnProcedures tp
+                    LEFT JOIN App\Models\Turns t ON t.id = tp.turn_id 
+                    LEFT JOIN App\Models\UsersSpecialtiesBranchoffices usb ON usb.id = t.usb_id
+                    LEFT JOIN App\Models\Users u ON u.id = usb.user_id
+                    LEFT JOIN App\Models\UserDetails ud ON ud.user_id = u.id
+                    LEFT JOIN App\Models\TurnStates ts ON t.turn_state_id = ts.id
+                    LEFT JOIN App\Models\Procedures pr ON pr.id = tp.procedure_id
+                    ";
+
+
+        $phql = $phql. " WHERE t.datetime_turn >= '{$date->format('Y-m-d H:i:s')}' ";
+        $phql = $phql. " AND  pr.id = {$procedureId} ";
+        $phql = $phql. " AND  t.turn_state_id = 1 ";
+        $phql = $phql. " ORDER BY t.datetime_turn ASC ";
+        $phql = $phql. " LIMIT {$limit} ";
+
+
+
+
+        $result = $this->modelsManager->createQuery($phql)->execute();
+    
+
+        return $result;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

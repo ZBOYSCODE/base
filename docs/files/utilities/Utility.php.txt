@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Utilities;
+/**
+ * Created by PhpStorm.
+ * User: jasilva
+ * Date: 14/09/2016
+ * Time: 12:59
+ */
+
+
+/**
+ * Clase para guardar metodos para la vista para usar con volt
+ * eg: {{ utility._strtotime('parametros_aqui') }}
+ * Class Utility
+ * @package App\Utilities
+ */
+class Utility
+{
+
+    function _strtotime($param) {
+        return strtotime($param);
+    }
+
+
+    function _split($param) {
+        return str_split($param);
+    }
+
+    function getItem($array, $indexx, $indexy) {
+
+    	if(isset($array[$indexx][$indexy]))
+    		return $array[$indexx][$indexy];
+    	else
+    		return false;
+    }
+}

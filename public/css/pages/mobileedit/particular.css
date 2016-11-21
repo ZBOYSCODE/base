@@ -1,0 +1,174 @@
+.mobile-edit-layout {
+    height: 100vh;
+    margin: 0px;
+    padding: 15px;
+    background-color: #FFFFFF;
+}
+
+
+
+.form-edit-mobile input,
+.form-edit-mobile select{
+    height: 60px;
+    color: #7d7d78;
+    font-size: 30px;
+    border: 1px solid white;
+    box-shadow: none;
+    background-color: #f2f2f2;
+    border-radius: 0px;
+}
+
+
+.form-edit-mobile textarea{
+    border: 1px solid white;
+    box-shadow: none;
+    background-color: #f2f2f2;
+}
+
+
+.form-edit-mobile input:focus,
+.form-edit-mobile textarea:focus{
+    background-color: #bad305;
+    color: white;
+    border-color: #edf0e6 !important;
+}
+
+
+.form-edit-mobile .form-control:focus::-moz-placeholder {
+    color: white;
+}
+
+
+.form-edit-mobile .form-control:focus:-ms-input-placeholder {
+    color: white;
+}
+
+
+.form-edit-mobile .form-control:focus::-webkit-input-placeholder {
+    color: white;
+}
+
+
+.btn-tempora {
+    color: #fff;
+    background-color: #a7bf05;
+    border:1px solid #a7bf05;
+}
+
+.btn-tempora.inverse{
+    color: #a7bf05;
+    background-color: #fff;
+    border:1px solid #a7bf05;
+}
+
+.btn-tempora:hover,.btn-tempora.active:focus, .btn-tempora:focus, .open>.dropdown-toggle.btn-tempora {
+    color: #fff;
+    background-color: #a7bf05;
+    outline: none;
+}
+
+.btn-tempora:active, .btn-tempora.active {
+    color: #fff;
+    background-color: #a7bf05;
+    margin-top: 2px;
+}
+
+
+.btn-tempora {
+    color: #fff;
+    background-color: #a7bf05;
+    border:1px solid #a7bf05;
+}
+
+.button-toolbar {
+    width: 80%;
+    margin: 20px;
+    margin: 0 auto;
+}
+
+
+.type-masculino,
+.type-femenino,
+.type-email,
+.type-sms,
+.type-phone
+{
+    color: #a7bf05;
+}
+
+#type-masculino.active,
+.type-masculino:hover{
+    background-color: #0bacd3;
+    color: white;
+}
+
+
+#type-femenino.active,
+.type-femenino:hover {
+    background-color: #d33ba2;
+    color: white;
+}
+
+#type-email.active,
+.type-email:hover{
+    background-color: #a7bf05;
+    color: white;
+}
+
+#type-sms.active,
+.type-sms:hover{
+    background-color: #a7bf05;
+    color: white;
+}
+
+#type-phone.active,
+.type-phone:hover{
+    background-color: #a7bf05;
+    color: white;
+}
+
+
+.examen-menu {
+    text-align: center;
+}
+
+.examen-menu-item {
+    width: 210px;
+}
+
+.examen-img-item {
+    font-size: 150px;
+    text-align: center;
+    border-radius: 15px;
+    width: 210px;
+    height: 210px;
+    padding: 0px;
+}
+
+.finish-msg {
+    text-align: center;
+    color: #a7bf05;
+    padding: 15px;
+}
+
+
+.examen-menu-item.xs {
+
+}
+
+.examen-img-item.xs {
+    font-size: 95px;
+    text-align: center;
+    border-radius: 15px;
+    width: 150px;
+    height: 150px;
+    padding: 8px;
+}
+
+
+
+
+.finish-msg h2 {
+    margin-top: 35px;
+    margin-bottom: 35px;
+}

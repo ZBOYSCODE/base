@@ -1,0 +1,126 @@
+<?php
+namespace App\library\Mifaces;
+
+use Phalcon\Mvc\User\Component;
+
+class Mifaces extends Component{
+
+	private $_toRend;
+	private $_toErrorForm;
+	private $_toNewWin;
+	private $_toMsg;
+	private $_toDataSelect;
+	private $_socket;
+    private $_toDataView;
+
+    public function __construct() {
+		$this->newFaces();
+	}
+
+    public function newFaces() {
+		$this->_toRend			= array();
+		$this->_toErrorForm		= array();
+		$this->_toRedir			= null;
+		$this->_toNewWin		= null;
+		$this->_toMsg			= array();
+		$this->_toDataSelect	= array();
+		$this->_socket			= array();
+        $this->_toDataView      = array();
+    }
+
+	public function addToDataSelect($to, $data){
+		$this->_toDataSelect[$to]=$data;
+	}
+
+	public function addToMsg($type, $msg, $run = false){
+		$this->_toMsg[$type]=$msg;
+		if($run){
+			$outputs[] = array('type' => 'msg',		'msgs'		=> $this->_toMsg );
+			echo json_encode($outputs);
+			exit();
+		}
+
+	}
+
+	public function addNewWin($htmlString, $name, $run = false){
+		if($name!=null && $htmlString!=null){
+			$this->_toNewWin['name']=$name;
+			$this->_toNewWin['htmlString']=$htmlString;
+			
+			if($run){
+				$outputs[] = array('type' => 'newWin', 'win' =>$this->_toNewWin['htmlString'], 'name'=>$this->_toNewWin['name']);
+				echo json_encode($outputs);			
+			}			
+		}
+	}
+
+	public function addSocket($jquery){
+		$this->_socket[]=$jquery;
+	}
+	
+	public function addToRend($div,$htmlString, $run = false){
+		$this->_toRend[$div]=$htmlString;
+		if($run){
+			$outputs[] = array('type' => 'render',	'renders'	=> $this->_toRend );
+			echo json_encode($outputs);
+			exit();
+		}
+	}
+
+	public function addErrorsForm($arreglo, $run = false){
+		if($arreglo!=null && $arreglo!=''){
+			foreach ($arreglo as $key => $value) {
+				$this->_toErrorForm[$key]=$value;
+			}
+		}
+		if($run){
+			$outputs[] = array('type' => 'errorForm', 'errors' =>$this->_toErrorForm);
+			echo json_encode($outputs);
+			exit();
+		}		
+	}
+
+	public function addToDataView($key, $data, $run = false){
+	    if($key != null && $data != null && $key != '' && $data != '') {
+	           $this->_toDataView[$key] = $data;
+        }
+        if($run) {
+            $outputs[] = array('type' => 'data', 'data' => $this->_toDataView);
+            echo json_encode($outputs);
+            exit();
+        }
+    }
+
+	public function run(){
+
+		$outputs = array();
+		
+		if(count($this->_toErrorForm)>0)		
+			$outputs[] = array('type' => 'errorForm', 'errors' =>$this->_toErrorForm);
+
+		if(count($this->_toRend)>0)
+			$outputs[] = array('type' => 'render',	'renders'	=> $this->_toRend );
+
+		if(count($this->_socket)>0)
+			$outputs[] = array('type' => 'socket',	'sockets'		=> $this->_socket );			
+		
+		if($this->_toNewWin!=null)
+			$outputs[] = array('type' => 'newWin', 	'win'		=> $this->_toNewWin['htmlString'], 'name' => $this->_toNewWin['name']);
+
+		if(count($this->_toMsg)>0)
+			$outputs[] = array('type' => 'msg',		'msgs'		=> $this->_toMsg );
+
+		if(count($this->_toDataSelect)>0){
+			foreach ($this->_toDataSelect as $key => $value) {
+				$outputs[] = array('type' => 'dataSelect', 'renders' => $value,'to'=>$key);
+			}
+		}
+
+		if(count($this->_toDataView)>0) {
+		    $outputs[] = array('type' => 'data',    'dataview'  => $this->_toDataView);
+        }
+
+		echo json_encode($outputs);
+	}
+}
+

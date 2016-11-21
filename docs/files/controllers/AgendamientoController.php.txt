@@ -1,0 +1,857 @@
+<?php
+
+namespace App\Controllers;
+
+use Phalcon\Mvc\View\Engine\Volt\Compiler as VoltCompiler;
+use App\Business\AgendaBSN;
+use App\Business\BranchOfficeBSN;
+use App\Business\SpecialtyBSN;
+use App\Business\UserBSN;
+use App\Business\TurnBSN;
+use App\Business\MedicalPlanBsn;
+
+
+class AgendamientoController extends ControllerBase
+{
+
+
+    /**
+     * indexAction
+     *
+     * @author Jorge Silva / Hernán Feliú
+     *
+     * Carga los javascript, css y datos necesarios para mostrar la vista por defecto
+     * de agendamiento (agenda diaria).
+     *
+     * Carga los turnos diarios, sucursales, especialistas, especialidades
+     *
+     */
+    public function indexAction()
+    {
+
+        #js para pegar el header de las tablas
+        $this->assets->addJs('js/plugins/jquery.stickyheader.js');
+        $this->assets->addJs('js/plugins/jquery.ba-throttle-debounce.min.js');
+
+        #js para pegar cualquier div
+        $this->assets->addJs('js/plugins/jquery.sticky.js');
+
+        #js custom
+        $this->assets->addJs('js/pages/scheduling.js');
+
+        #Array param para obtener Turnos
+        $dataTurns = [
+            'date' => date("Y-m-d"),
+            'specialty_id' => 1,
+            'branchOffice_id' => 1
+        ];
+
+        $dataSpecialist = [
+            'specialty_id' => 1,
+            'branchOffice_id' => 1
+        ];
+
+        $dataBranchOffice = 1;
+
+
+        # Turnos Diarios
+        $agndObj = new AgendaBSN();
+        $dailyTurns = $agndObj->getDailyTurns($dataTurns);
+
+        # Especialistas
+        $spcObj = new UserBSN();
+        $specialists = $spcObj->getListSpecialistUSB($dataSpecialist);
+
+        # Sucursales
+        $sucurObj = new BranchOfficeBSN();
+        $branchOffices = $sucurObj->getBranchOffices();
+
+
+        # Especialidades
+        $speclObj = new SpecialtyBSN();
+        $specialities = $speclObj->getByBranchoffice($dataBranchOffice);
+
+
+
+        $this->view->setVar("specialities", $specialities);
+        $this->view->setVar("dailyTurns", $dailyTurns);
+        $this->view->setVar("specialists", $specialists);
+        $this->view->setVar("brancheOffices", $branchOffices);
+
+
+        #vista
+        $this->view->pick("controllers/scheduling/_index");
+    }
+
+    /**
+     * dailyAction
+     *
+     * @author Jorge Silva
+     *
+     * Método para cambiar desde vista semanal a diaria, renderiza
+     * via mifaces los turnos del dia en una tabla.
+     *
+     * @return json via mifaces con vista diaria a renderizar
+     */
+    public function dailyAction()
+    {
+        if($this->request->isAjax()) {
+
+            $dataView['data'] = array();
+            $view = 'controllers/scheduling/daily/_index';
+
+
+            $post = $this->request->getPost();
+
+
+            $agendaBSNObject = new AgendaBSN();
+
+
+            #parametros
+
+            $sucursal = 1;
+
+            $dataturn =  [
+                "date" => $post["date"],
+                "specialty_id" => $post["specialty"],
+                "branchOffice_id" => $sucursal
+            ];
+
+
+            #data para la vista
+            $dataView["dailyTurns"] = $agendaBSNObject->getDailyTurns($dataturn);
+
+
+
+            #MiFaces
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->newFaces();
+            $this->mifaces->addToRend('calendario', $toRend);
+            $this->mifaces->addToDataView('view_type', "diaria");
+            $this->mifaces->run();
+
+        }
+        else {
+            $this->defaultRedirect();
+        }
+    }
+
+
+    /**
+     * weeklyAction
+     *
+     * @author Hernan Feliú
+     *
+     * Método para cambiar desde vista diaria a semanal, renderiza
+     * via mifaces los turnos de la semana en un calendario.
+     *
+     * @return json via mifaces con vista semanal a renderizar
+     *
+     */
+    public function weeklyAction()
+    {
+        if($this->request->isAjax()) {
+
+            $dataView['data'] = array();
+            $view = 'controllers/scheduling/weekly/_index';
+
+            $post = $this->request->getPost();
+
+            $agendaBSNObject = new AgendaBSN();
+
+
+            #parametros
+
+
+            $dataturn =  [
+                "date" => $post["date"],
+                "usb_id" => $post["usb"]
+            ];
+
+
+            #data para la vista
+
+            $dataView["weeklyturns"] = $agendaBSNObject->getWeeklyTurns($dataturn);
+            $dataView["headerdays"] = $agendaBSNObject->getDaysOfWeekTurn($dataturn)->days;
+            //print_r( $dataView["weeklyturns"]);exit();
+
+            #MiFaces
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->newFaces();
+            $this->mifaces->addToRend('calendario', $toRend);
+            $this->mifaces->addToDataView('view_type', "semanal");
+            $this->mifaces->run();
+
+        }
+        else {
+            $this->defaultRedirect();
+        }
+    }
+
+
+    /**
+     * changespecialistAction
+     *
+     * @author Jorge Silva
+     *
+     * Metodo para cambiar la lista de especialistas dependiendo de la especialidad
+     *
+     * @return json con vista a renderizar
+     *
+     */
+    public function changespecialistAction() {
+        if($this->request->isAjax()) {
+
+            $post = $this->request->getPost();
+            $view = "controllers/scheduling/box_professionals";
+            $this->mifaces->newFaces();
+
+
+            if(isset($post["speciality"])) {
+
+                $userBSNObject = new UserBSN();
+
+                $datausb = [
+                    "branchOffice_id" => 1 ,
+                    "specialty_id" =>  $post["speciality"]
+                ];
+
+
+
+                $dataView["specialists"] = $userBSNObject->getListSpecialistUSB($datausb);
+
+                #MiFaces
+                $toRend = $this->view->getPartial($view, $dataView);
+                $this->mifaces->addToRend('profesionals', $toRend);
+            }
+            else {
+                #en caso de no venga la variable post
+                $this->mifaces->addToMsg("danger", "Error Inesperado");
+            }
+
+
+            #corremos mifaces
+            $this->mifaces->run();
+
+        }
+
+        else {
+
+            $this->defaultRedirect();
+        }
+    }
+
+
+
+    /**
+     * changecalendarAction
+     *
+     * @author Jorge Silva
+     *
+     * Metodo para cambiar el calendario diario y semanal.
+     * depende de la variable type enviada por post en la llamada ajax
+     *
+     * @return json con vista o msg via mifaces
+     *
+     */
+    public function changecalendarAction() {
+
+        if($this->request->isAjax()) {
+
+            $post = $this->request->getPost();
+
+            if(isset($post["type"])) {
+
+                $this->mifaces->newFaces();
+
+
+                if($post["type"] == "day") {
+                    $status = $this->changeDay($post);
+                }
+
+                if($post["type"] == "week") {
+                    $status = $this->changeWeek($post);
+                }
+
+
+                $this->mifaces->run();
+            }
+
+
+        }
+
+        else {
+
+            $this->defaultRedirect();
+        }
+
+
+    }
+
+
+    /**
+     * changeDay
+     *
+     * @author Jorge Silva
+     *
+     * Cambia el dia en el calendario para vista diaria
+     *
+     * @param array $parameters : parametros del post [date, specialty_id]
+     * @return bool false en caso de excepción
+     * @return json con la vista a renderizar via mifaces
+     */
+    private function changeDay($parameters = null)
+    {
+
+        $view = "controllers/scheduling/daily/_index";
+
+        if($parameters != null && isset($parameters["date"] )) {
+            #cambio si es que la fecha viene seteada
+
+
+            $agendaBSNObject = new AgendaBSN();
+
+
+            $data = [
+                "date" => $parameters["date"],
+                "specialty_id" => $parameters["specialty"],
+                "branchOffice_id" => 1 //cambiar por variable de session
+            ];
+
+            $data["dailyTurns"] = $agendaBSNObject->getDailyTurns($data);
+
+
+
+            $toRend = $this->view->getPartial($view, $data);
+            $this->mifaces->addToRend('calendario', $toRend);
+
+        }
+        else {
+            return false;
+        }
+
+    }
+
+
+    /**
+     * changeWeek
+     *
+     * @author Jorge Silva
+     *
+     * cambia el dia en el calendario para vista semanal
+     *
+     * @param array $parameters : [date, specialty_id]
+     * @return bool false en caso de excepción
+     * @return json con la vista a renderizar via mifaces
+     */
+    private function changeWeek($parameters = null)
+    {
+
+        $view = "controllers/scheduling/weekly/_index";
+
+        if($parameters != null && isset($parameters["date"])) {
+            #cambio si es que la fecha viene seteada
+
+            $data = [
+                "date" => $parameters["date"],
+                "usb_id" => $parameters["usb"],
+            ];
+
+            $agndObj = new AgendaBSN();
+            $data["weeklyturns"] = $agndObj->getWeeklyTurns($data);
+            $data["headerdays"] = $agndObj->getDaysOfWeekTurn($data)->days;
+
+
+            $toRend = $this->view->getPartial($view, $data);
+            $this->mifaces->addToRend('calendario', $toRend);
+
+        }
+        else {
+            return false;
+        }
+    }
+
+
+    /**
+     * changeweekspecialistAction
+     *
+     * @author Jorge Silva
+     *
+     * Cambia el calendario semanal al recibir via ajax/mifaces un usb y date
+     *
+     */
+    public function changeweekspecialistAction() {
+
+        if($this->request->isAjax()){
+
+            $view = "controllers/scheduling/weekly/_index";
+            $post = $this->request->getPost();
+
+            $this->mifaces->newFaces();
+
+
+            if(isset($post["usb"]) && isset($post["date"])) {
+
+                $agendaBSNObject = new AgendaBSN();
+
+                # parametro para buscar los turnos de la semana
+                $dataturn = [
+                    "usb_id" => $post["usb"],
+                    "date" => $post["date"]
+                ];
+
+                # parametros a enviar a la vista parcial
+                $data = [];
+
+
+                $dataView["weeklyturns"] = $agendaBSNObject->getWeeklyTurns($dataturn);
+                $dataView["headerdays"] = $agendaBSNObject->getDaysOfWeekTurn($dataturn)->days;
+
+
+                $toRend = $this->view->getPartial($view, $dataView);
+                $this->mifaces->addToRend('calendario', $toRend);
+
+            }
+
+            else {
+
+                $this->mifaces->addToMsg("danger","Error Inesperado.");
+
+            }
+
+
+            $this->mifaces->run();
+
+
+        }
+        else {
+
+            $this->defaultRedirect();
+        }
+
+    }
+
+
+    /**
+     * scheduleAction
+     *
+     * @author Hernan Feliú
+     *
+     * Método para mostrar modal para agendarr en vista diaria/semanal, renderiza
+     * via mifaces con datos de turno.
+     * @param id  para obtener datos de turno
+     * @return json via mifaces con vista modal(Agendar) a renderizar
+     *
+     */
+
+    public function scheduleAction(){
+
+        if($this->request->isAjax()){
+
+            $view = "controllers/scheduling/modal_schedule";
+            $this->mifaces->newFaces();
+
+
+            $post = $this->request->getPost();
+            $turnObj = new TurnBSN();
+
+            $dataTurn = [
+                "turn_id" => $post["id"]
+            ];
+
+            $dataView["motivos"] = $turnObj->getTurnCategories();
+            $dataView["turno"] = $turnObj->getTurn($dataTurn);
+            $fecha = $dataView["turno"]->datetime_turn;
+            $dataView["fecha"] = $this->Constant->_getDateFormatFull($fecha);
+
+
+
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->addToRend('modal', $toRend);
+            $this->mifaces->run();
+
+        }else{
+
+            $this->defaultRedirect();
+        }
+    }
+
+    /**
+     * confirmAction
+     *
+     * @author Hernan Feliú
+     *
+     * Método para mostrar modal para confirmar turno/reserva en vista diaria/semanal, renderiza
+     * via mifaces con datos de turno.
+     * @param id  para obtener datos de turno
+     * @return json via mifaces con vista modal(Agendar) a renderizar
+     *
+     */
+
+    public function confirmAction(){
+
+        if($this->request->isAjax()){
+
+            $view = "controllers/scheduling/modal_confirm";
+            $this->mifaces->newFaces();
+
+
+            $post = $this->request->getPost();
+
+            $turnObj = new TurnBSN();
+            $userObj = new UserBSN();
+            $planObj = new MedicalPlanBsn();
+
+
+            $dataTurn = [
+                "turn_id" => $post["id"]
+            ];
+
+            $turno = $turnObj->getTurn($dataTurn);
+            $fecha = $turno->datetime_turn;
+            $patient = $turno->Users;
+
+
+            $dataView["turno"] = $turno;
+            $dataView["paciente"] = $patient;
+            $dataView["motivos"] = $turnObj->getTurnCategories();
+            $dataView["planes"] = $planObj->getListMedicalPlan();
+            $dataView["fecha"] = $this->Constant->_getDateFormatFull($fecha);
+
+
+            #mifaces actions
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->addToRend('modal', $toRend);
+
+            $this->mifaces->run();
+
+        }else{
+
+            $this->defaultRedirect();
+        }
+    }
+
+    /**
+     * receptionAction
+     *
+     * @author Hernan Feliú
+     *
+     * Método para mostrar modal para recepcionar pacientes en vista diaria/semanal, renderiza
+     * via mifaces con datos de turno.
+     * @return json via mifaces con vista modal(Agendar) a renderizar
+     *
+     */
+
+    public function receptionAction(){
+
+        if($this->request->isAjax()){
+
+            $post = $this->request->getPost();
+
+            $turnObj = new TurnBSN();
+
+            $dataTurn = [
+                "turn_id" => $post["id"]
+            ];
+
+            $dataView["motivos"] = $turnObj->getTurnCategories();
+
+            $dataView["turno"] = $turnObj->getTurn($dataTurn);
+            $fecha = $dataView["turno"]->datetime_turn;
+
+            $dataView["fecha"] = $this->Constant->_getDateFormatFull($fecha);
+
+            $this->mifaces->newFaces();
+
+            $view = "controllers/scheduling/modal_reception";
+
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->addToRend('modal', $toRend);
+
+            $this->mifaces->run();
+
+        }else{
+
+            $this->defaultRedirect();
+        }
+    }
+
+
+    /**
+     * payAction
+     *
+     * @author Hernan Feliú
+     *
+     * Método para mostrar modal para recepcionar pacientes en vista diaria/semanal, renderiza
+     * via mifaces con datos de turno.
+     * @return json via mifaces con vista modal(Agendar) a renderizar
+     *
+     */
+
+    public function payAction(){
+
+        if($this->request->isAjax()){
+            $post = $this->request->getPost();
+
+            $turnObj = new TurnBSN();
+
+            $dataTurn = [
+                "turn_id" => $post["id"]
+            ];
+
+            $dataView["motivos"] = $turnObj->getTurnCategories();
+
+            $dataView["turno"] = $turnObj->getTurn($dataTurn);
+            $fecha = $dataView["turno"]->datetime_turn;
+
+            $dataView["fecha"] = $this->Constant->_getDateFormatFull($fecha);
+
+            $this->mifaces->newFaces();
+
+            $view = "controllers/scheduling/modal_pay";
+
+            $toRend = $this->view->getPartial($view, $dataView);
+            $this->mifaces->addToRend('modal', $toRend);
+
+            $this->mifaces->run();
+
+        }else{
+
+            $this->defaultRedirect();
+        }
+    }
+
+
+
+    /**
+     * schedulepersistAction
+     *
+     * @author Jorge Silva
+     *
+     * Método para persistir un turno y un paciente (crear / editar)
+     *
+     * @return json con la vista a renderizar via mifaces
+     */
+
+    public function schedulepersistAction() {
+
+        if($this->request->isAjax()) {
+
+            $post = $this->request->getPost();
+
+            $this->mifaces->newFaces();
+
+            //print_r($post);exit;
+
+            if(isset($post["turn"])) {
+
+                $agendaBSNObject = new AgendaBSN();
+
+                # parametros a persisitr el turno actualizado
+                $dataturn = [
+                    "turn_id" => $post["turn"],
+                    "data" => [
+                        "patient_id" => $post["user"],
+                        "turn_category_id" => $post["category"],
+                        "phone_fixed" => $post["phone_fixed"],
+                        "phone_mobile" => $post["phone_mobile"],
+                        "email" => $post["email"],
+                        "medical_plan_id" => $post["medical_plan"],
+                        "comments" => $post["comments"],
+                    ]
+                ];
+
+                $response = $agendaBSNObject->storeTurnSchedule($dataturn);
+
+
+                if($response) {
+                    # cambiamos el calendario del día o semana dependiendo de la vista
+
+                    if ($post["type"] == "day") {
+                        $status = $this->changeDay($post);
+                    }
+
+                    if ($post["type"] == "week") {
+                        $status = $this->changeWeek($post);
+                    }
+                }
+                else {
+                    # si es que no se persiste, mostramos error
+                    $this->mifaces->addToMsg("danger","Error al agendar.");
+                }
+
+
+            }
+
+            else {
+
+                $this->mifaces->addToMsg("danger","Error Inesperado.");
+
+            }
+
+
+
+            $this->mifaces->run();
+
+        }
+        else {
+            $this->defaultRedirect();
+        }
+
+    }
+
+
+    public function scheduleformAction() {
+        if($this->request->isAjax()) {
+
+            $view = "controllers/scheduling/modal_schedule_form";
+            $this->mifaces->newFaces();
+
+
+            $post = $this->request->getPost();
+
+            if(isset($post["user"]) && is_int((int)$post["user"])) {
+
+
+                # Traemos el paciente seleccionado
+                $params = [
+                  "id" => $post["user"]
+                ];
+
+                $userBSNObj = new UserBSN();
+                $patient = $userBSNObj->getPatient($params);
+
+
+
+
+                # Traemos la categoria seleccionada
+                $paramsCat = [
+                    "id" => $post["category"]
+                ];
+
+                $turnObj = new TurnBSN();
+                $category = $turnObj->getTurnCategoriesBy($paramsCat);
+
+
+
+                # Traemos todos los planes
+                $planObj = new MedicalPlanBsn();
+                $planes = $planObj->getListMedicalPlan();
+
+
+
+
+                # si se obtinen los datos correctamente renderizamos la vista.
+                if($patient && $category && $planes) {
+
+                    $dataView["paciente"] = $patient;
+                    $dataView["motivo"] = $category;
+                    $dataView["planes"] = $planes;
+                    $toRend = $this->view->getPartial($view, $dataView);
+                    $this->mifaces->addToRend('completeForm', $toRend);
+                }
+
+
+                else {
+
+                    $this->mifaces->addToMsg("danger","Error al traer datos con los parametros seleccionados");
+
+                }
+
+            }
+
+            else {
+
+                $this->mifaces->addToMsg("danger","Error en la operación.");
+            }
+
+
+            $this->mifaces->run();
+        }
+        else {
+            $this->defaultRedirect();
+        }
+
+
+    }
+
+
+    public function confirmpersistAction() {
+        if($this->request->isAjax()) {
+
+            $post = $this->request->getPost();
+
+            $this->mifaces->newFaces();
+
+            if(isset($post["turn"])) {
+
+                $agendaBSNObject = new AgendaBSN();
+                $turnObj = new TurnBSN();
+
+
+                #traemos los datos del turno para actualizar el paciente
+                $dataTurn = [
+                    "turn_id" => $post["turn"]
+                ];
+
+                $turn = $turnObj->getTurn($dataTurn);
+                $paciente = $turn->Users->id;
+
+
+
+                # parametros a persisitr el turno actualizado
+                $dataturn = [
+                    "turn_id" => $post["turn"],
+                    "data" => [
+                        "patient_id" => $paciente,
+                        "turn_category_id" => $post["category"],
+                        "phone_fixed" => $post["phone_fixed"],
+                        "phone_mobile" => $post["phone_mobile"],
+                        "email" => $post["email"],
+                        "medical_plan_id" => $post["medical_plan"],
+                        "comments" => $post["comments"],
+                    ]
+                ];
+
+                $response = $agendaBSNObject->storeTurnConfirm($dataturn);
+
+
+                if($response) {
+                    # cambiamos el calendario del día o semana dependiendo de la vista
+
+                    if ($post["type"] == "day") {
+                        $status = $this->changeDay($post);
+                    }
+
+                    if ($post["type"] == "week") {
+                        $status = $this->changeWeek($post);
+                    }
+                }
+                else {
+                    # si es que no se persiste, mostramos error
+                    $this->mifaces->addToMsg("danger","Error al agendar.");
+                }
+
+
+            }
+            else {
+
+                $this->mifaces->addToMsg("danger","Error Inesperado.");
+
+            }
+
+
+
+            $this->mifaces->run();
+
+        }
+        else {
+            $this->defaultRedirect();
+        }
+
+    }
+
+
+
+
+}

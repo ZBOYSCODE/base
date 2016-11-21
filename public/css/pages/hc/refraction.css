@@ -1,0 +1,68 @@
+/**************/
+/* spiner para los inputs con numeros */
+/*http://bootsnipp.com/snippets/featured/input-spinner-with-min-and-max-values*/
+
+.spinner input {
+    text-align: right;
+}
+
+.input-group-btn-vertical {
+    position: relative;
+    white-space: nowrap;
+    width: 2%;
+    vertical-align: middle;
+    display: table-cell;
+}
+
+.input-group-btn-vertical > .btn {
+    display: block;
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 8px;
+    margin-left: -1px;
+    position: relative;
+    border-radius: 0;
+    height: 23px;
+}
+
+.input-group-btn-vertical > .btn:first-child {
+    border-top-right-radius: 4px;
+}
+
+.input-group-btn-vertical > .btn:last-child {
+    margin-top: -2px;
+    border-bottom-right-radius: 4px;
+}
+
+.input-group-btn-vertical i {
+    position: absolute;
+    top: 0;
+    left: 4px;
+}
+
+.arrowBox {
+    color: #1BBAE1;
+    background: #FFFFFF;
+    font-size: 20px;
+    border-style: outset;
+    border-color: #1BBAE1;
+    border-width: 2px;
+    cursor: pointer;
+}
+
+.arrowCenter {
+    position: relative;
+    top: 21px;
+    right: 13px;
+}
+
+
+.subjetiva-receta .chosen-container.chosen-with-drop .chosen-drop {
+    left: 197px;
+    top: 5px;
+}
+
+.refraction-table .input-group{
+    padding: 5px;
+}

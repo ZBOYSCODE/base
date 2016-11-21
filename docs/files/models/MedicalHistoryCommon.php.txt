@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Models;
+
+
+class MedicalHistoryCommon extends \Phalcon\Mvc\Model
+{
+
+    /**
+     *
+     * @var integer
+     */
+    public $id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $medical_history_type_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $created_at;
+
+    /**
+     *
+     * @var integer
+     */
+    public $created_by_user_id;
+
+    /**
+     *
+     * @var string
+     */
+    public $description;
+
+    /**
+     *
+     * @var integer
+     */
+    public $user_patient_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $user_specialist_id;
+
+    /**
+     *
+     * @var integer
+     */
+    public $state_id;
+
+    /**
+     * Initialize method for model.
+     */
+    public function initialize()
+    {
+        $this->hasMany('id', __NAMESPACE__.'\MedicalHistoryCommonExtra', 'medical_history_common_id', array('alias' => 'MedicalHistoryCommonExtra'));
+        $this->belongsTo('medical_history_type_id', __NAMESPACE__.'\MedicalHistoryType', 'id', array('alias' => 'MedicalHistoryType'));
+        $this->belongsTo('created_by_user_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+        $this->belongsTo('user_patient_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+        $this->belongsTo('user_specialist_id', __NAMESPACE__.'\Users', 'id', array('alias' => 'Users'));
+        $this->belongsTo('state_id', __NAMESPACE__.'\ExamState', 'id', array('alias' => 'ExamState'));
+    }
+
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'medical_history_common';
+    }
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryCommon[]
+     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return MedicalHistoryCommon
+     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+}
+

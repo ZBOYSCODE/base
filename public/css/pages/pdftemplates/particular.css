@@ -1,0 +1,18 @@
+.report-title {
+    font-size: 28px;
+    color: #9d9d9d;
+}
+
+.report-subtitle {
+    font-size: 20px;
+    color: #8d8d8d;
+}
+
+.report-generate-info {
+    font-size: 10px;
+    color: gray;
+}
+
+.to-center {
+    text-align: center;
+}

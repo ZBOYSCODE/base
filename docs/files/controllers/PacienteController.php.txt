@@ -1,0 +1,207 @@
+<?php
+
+namespace App\Controllers;
+use Phalcon\Mvc\View\Engine\Volt\Compiler as VoltCompiler;
+
+use App\Business\UserBSN;
+use App\Business\MedicalPlanBSN;
+
+use App\library\Valida\Valida;
+
+class PacienteController extends ControllerBase
+{
+
+    public function initialize() {
+
+        #js para pegar cualquier div
+        $this->assets->addJs('js/plugins/jquery.sticky.js');
+        #js custom
+        $this->assets->addJs('js/pages/patient.js');
+
+    }
+
+
+    public function indexAction() {
+        $this->hcAction();
+    }
+
+    /**
+     * Metodo get muestra el historial clinico de un paciente en particular
+     * @param null $id*
+     */
+    public function hcAction($id = null)
+    {
+        if($id == null){
+            $this->notFoundRedirect();
+        }
+
+        else {
+
+            $this->view->setVar("subview","controllers/patient/hc/_index");
+            $this->view->pick("controllers/patient/_index");
+
+        }
+    }
+
+
+    /**
+     * Metodo get muestra la subvista de
+     * @author Sebastián Silva
+     *
+     * @param integer $id
+     */
+    public function editAction($id = null) {
+
+        if($id == null){
+            $this->notFoundRedirect();
+        }
+
+        else {
+
+            $param = array(
+                'id' => $id
+            );
+
+            $userBsn    = new UserBSN();
+            $user       = $userBsn->getPatient($param); 
+
+            $plan       = new MedicalPlanBsn();
+            $planes     = $plan->getListMedicalPlan(); 
+
+
+            $this->view->setVar('paciente', $user);
+            $this->view->setVar('medicalplan', $planes);
+
+            $this->view->setVar("subview","controllers/patient/edit/_index");
+            $this->view->pick("controllers/patient/_index");
+            
+
+        }
+
+    }
+
+    /**
+     * guarda y actualiza los datos del paciente
+     * @param integer $id
+     */
+    public function storeAction() {
+
+        if( empty($_POST['iduser']) ) {
+            $data['success']   = false;
+            $data['msg']       = "Imposible editar el paciente";
+            echo json_encode($data);
+            exit;
+        }
+
+        $valida = new Valida($_POST, [
+            'iduser'    => "required|int",
+            'username'  => "string",
+            'email'     => "email",
+            'firstname' => "string",
+            'lastname'  => "string",
+            'location'  => "string",
+            'phone_fixed'   => "string",
+            'phone_mobile'  => "string",
+            'medical_plan_id'   => "int",
+            //'comments'  => "string",
+            'rut'       => "string"
+        ]);
+
+        if($valida->failed()){
+            $data['success'] = false;
+            $data['msg'] = $valida->errors;
+            echo json_encode($data);
+            exit;
+        }
+
+        $userBsn    = new UserBSN();
+
+        $arg = array(
+            'id' => $_POST['iduser'],
+            'username' => $_POST['username'],
+            'email' => $_POST['email']
+        );
+
+        if( !$userBsn->createUser($arg) ){
+
+            $data['success'] = false;
+            $data['msg'] = $userBsn->error;
+
+        } else {
+
+            $arg = array(
+                'user_id'   => $_POST['iduser'],
+                'firstname' => $_POST['firstname'],
+                'lastname'  => $_POST['lastname'],
+                'location'  => $_POST['location'],
+                'phone_fixed'       => $_POST['phone_fixed'],
+                'phone_mobile'      => $_POST['phone_mobile'],
+                'medical_plan_id'   => $_POST['medical_plan_id'],
+                //'comments'  => $_POST['comments'],
+                'rut'       => $_POST['rut']
+            );
+
+            if( ! $userBsn->createUserDetail($arg) ){
+
+                $data['success'] = false;
+                $data['msg'] = $userBsn->error;
+
+            } else{
+                $data['success'] = true;
+            }
+            
+            
+        }
+
+            
+
+        echo json_encode($data);
+
+    }
+
+    /**
+     * Lista de pacientes
+     * 
+     * @author Sebastián Silva
+     */
+    public function listAction() {
+
+        $this->assets->addJs('js/pages/patient_list.js');
+
+        $this->view->setVar("subview","controllers/patient/list/_index");
+        $this->view->pick("controllers/patient/_index_alt");
+
+    }
+
+    /**
+     * Busqueda de pacientes paginada
+     *
+     * @author Sebastián Silva
+     */
+    public function searchPatientAction() { 
+
+
+        $user = new UserBSN();
+
+        $param = array(
+            'pagination'    => true,
+            'limit'         => $this->request->get("limit", 'int'),
+            'page'          => $this->request->get("page", 'int'),
+            'role'          => $this->request->get("role", 'int'),
+            'search'        => $this->request->get("search", 'string')
+        );
+
+        $list = $user->index($param);
+
+
+        echo json_encode($list);
+
+    }
+
+
+
+
+
+
+
+}

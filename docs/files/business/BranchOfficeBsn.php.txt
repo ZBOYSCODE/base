@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Business;
+
+use Phalcon\Mvc\User\Plugin;
+use App\Models\BranchOffices;
+
+
+class BranchOfficeBSN extends Plugin
+{
+	public 	$error;
+
+	/**
+	 * Lista de sucursales
+	 *
+     * @author ssilvac
+	 * @return object Listado de sucursales
+	 */
+    public function getBranchOffices() {
+
+    	$branchoffices = BranchOffices::find();
+		return $branchoffices;
+    
+    }
+
+}

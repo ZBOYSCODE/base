@@ -2,8 +2,7 @@
  namespace App\Controllers\Maestros;
 use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
-use App\Models\Users;
-use App\Models\Roles;
+use App\Business\UserBSN;
 
 class UsersController extends ControllerBase
 {
@@ -14,14 +13,9 @@ class UsersController extends ControllerBase
     {
         $this->persistent->parameters = null;
 
-        $roles = Roles::find();
-        $roles_ = array('' => '-');
-        if($roles->count() != 0){
-            foreach ($roles as $role) {
-                $roles_[$role->id] = $role->name;
-            }
-        }
-        $this->view->roles = $roles_;
+        $bsn = new UserBSN();
+
+        $this->view->roles = $bsn->getAllRoles();
 
         $this->view->pick('controllers/maestros/users/index');
     }
@@ -31,23 +25,31 @@ class UsersController extends ControllerBase
      */
     public function searchAction()
     {
+        $bsn = new UserBSN();
         $numberPage = 1;
+        $parametters = array();
         if ($this->request->isPost()) {
-            $query = Criteria::fromInput($this->di, 'App\Models\Users', $_POST);
-            $this->persistent->parameters = $query->getParams();
+            $parametters['id'] = $this->request->getPost("id");
+            $parametters['username'] = $this->request->getPost("username");
+            $parametters['email'] = $this->request->getPost("email", "email");
+            $parametters['avatar'] = $this->request->getPost("avatar");
+            $parametters['password'] = $this->request->getPost("password");
+            $parametters['banned'] = $this->request->getPost("banned");
+            $parametters['suspended'] = $this->request->getPost("suspended");
+            $parametters['active'] = $this->request->getPost("active");
+            $parametters['role_id'] = $this->request->getPost("role_id");
+            $parametters['created_at'] = $this->request->getPost("created_at");
         } else {
             $numberPage = $this->request->getQuery("page", "int");
         }
 
-        $parameters = $this->persistent->parameters;
-        if (!is_array($parameters)) {
-            $parameters = array();
-        }
-        $parameters["order"] = "id";
-
-        $users = Users::find($parameters);
-        if (count($users) == 0) {
-            $this->flash->notice("The search did not find any users");
+        $users = $bsn->getUsers($parametters);
+        if (!$users) {
+            $msg = '';
+            foreach ($bsn->error as $err) {
+                $msg = $msg . ' ' . $err;
+            }
+            $this->flash->error($msg);
 
             $this->dispatcher->forward(array(
                 "controller" => "users",
@@ -65,14 +67,7 @@ class UsersController extends ControllerBase
 
         $this->view->page = $paginator->getPaginate();
 
-        $roles = Roles::find();
-        $roles_ = array();
-        if($roles->count() != 0){
-            foreach ($roles as $role) {
-                $roles_[$role->id] = $role->name;
-            }
-        }
-        $this->view->roles = $roles_;
+        $this->view->roles = $bsn->getAllRoles();
 
         $this->view->baseUri = $this->di->get('url')->getBaseUri();
 
@@ -85,15 +80,9 @@ class UsersController extends ControllerBase
     public function newAction()
     {
 
+        $bsn = new UserBSN();
 
-        $roles = Roles::find();
-        $roles_ = array();
-        if($roles->count() != 0){
-            foreach ($roles as $role) {
-                $roles_[$role->id] = $role->name;
-            }
-        }
-        $this->view->roles = $roles_;
+        $this->view->roles = $bsn->getAllRoles();
 
         $this->view->pick('controllers/maestros/users/new');
     }
@@ -105,11 +94,21 @@ class UsersController extends ControllerBase
      */
     public function editAction($id)
     {
+        $bsn = new UserBSN();
+
         if (!$this->request->isPost()) {
 
-            $user = Users::findFirstByid($id);
+            $param = array(
+                'id' => $id
+            );
+
+            $user = $bsn->show($param);
             if (!$user) {
-                $this->flash->error("user was not found");
+                $msg = '';
+                foreach ($bsn->error as $err) {
+                    $msg = $msg . ' ' . $err;
+                }
+                $this->flash->error($msg);
 
                 $this->dispatcher->forward(array(
                     'controller' => "users",
@@ -132,17 +131,8 @@ class UsersController extends ControllerBase
             $this->tag->setDefault("active", $user->active);
             $this->tag->setDefault("role_id", $user->role_id);
             $this->tag->setDefault("created_at", $user->created_at);
-            $this->tag->setDefault("sucursal", $user->sucursal);
 
-
-            $roles = Roles::find();
-            $roles_ = array();
-            if($roles->count() != 0){
-                foreach ($roles as $role) {
-                    $roles_[$role->id] = $role->name;
-                }
-            }
-            $this->view->roles = $roles_;
+            $this->view->roles = $bsn->getAllRoles();
 
             $this->view->pick('controllers/maestros/users/edit');
         }
@@ -153,6 +143,7 @@ class UsersController extends ControllerBase
      */
     public function createAction()
     {
+        $bsn = new UserBSN();
         if (!$this->request->isPost()) {
             $this->dispatcher->forward(array(
                 'controller' => "users",
@@ -162,20 +153,19 @@ class UsersController extends ControllerBase
             return;
         }
 
-        $user = new Users();
-        $user->username = $this->request->getPost("username");
-        $user->email = $this->request->getPost("email", "email");
-        $user->avatar = $this->request->getPost("avatar");
-        $user->password = $this->request->getPost("password");
-        $user->banned = $this->request->getPost("banned");
-        $user->suspended = $this->request->getPost("suspended");
-        $user->active = $this->request->getPost("active");
-        $user->role_id = $this->request->getPost("role_id");
-        $user->sucursal = $this->request->getPost("sucursal");
-        
+        $parametter = array(
+            'username' => $this->request->getPost("username"),
+            'email' => $this->request->getPost("email", "email"),
+            'avatar' => $this->request->getPost("avatar"),
+            'password' => $this->request->getPost("password"),
+            'banned' => $this->request->getPost("banned"),
+            'suspended' => $this->request->getPost("suspended"),
+            'active' => $this->request->getPost("active"),
+            'role_id' => $this->request->getPost("role_id")
+        );
 
-        if (!$user->save()) {
-            foreach ($user->getMessages() as $message) {
+        if (!$bsn->createUser($parametter)) {
+            foreach ($bsn->error as $message) {
                 $this->flash->error($message);
             }
 
@@ -198,6 +188,7 @@ class UsersController extends ControllerBase
      */
     public function saveAction()
     {
+        $bsn = new UserBSN();
 
         if (!$this->request->isPost()) {
 
@@ -206,10 +197,17 @@ class UsersController extends ControllerBase
         }
 
         $id = $this->request->getPost("id");
-        $user = Users::findFirstByid($id);
+
+        $param = array(
+            'id' => $id
+        );
+
+        $user = $bsn->show($param);
 
         if (!$user) {
-            $this->flash->error("user does not exist " . $id);
+            foreach ($bsn->error as $message) {
+                $this->flash->error($message);
+            }
 
             $this->dispatcher->forward(array(
                 'controller' => "users",
@@ -218,34 +216,26 @@ class UsersController extends ControllerBase
 
             return;
         }
-
-        $user->username = $this->request->getPost("username");
-        $user->email = $this->request->getPost("email", "email");
-        $user->avatar = $this->request->getPost("avatar");
-        $pass = $this->request->getPost("password");
-        if (!isset($pass) or !empty($pass)) {
-            $user->password = $this->getDI()
-                ->getSecurity()
-                ->hash($pass);
-        }
-        $user->banned = $this->request->getPost("banned");
-        $user->suspended = $this->request->getPost("suspended");
-        $user->active = $this->request->getPost("active");
-        $user->role_id = $this->request->getPost("role_id");
-        $user->sucursal = $this->request->getPost("sucursal");
+        $parametters = array(
+            'id' => $id
+        );
+        $parametters['username'] = $this->request->getPost("username");
+        $parametters['email'] = $this->request->getPost("email", "email");
+        $parametters['avatar'] = $this->request->getPost("avatar");
+        $parametters['password'] = $this->request->getPost("password");
+        $parametters['banned'] = $this->request->getPost("banned");
+        $parametters['suspended'] = $this->request->getPost("suspended");
+        $parametters['active'] = $this->request->getPost("active");
+        $parametters['role_id'] = $this->request->getPost("role_id");
         
 
-        if (!$user->save()) {
+        if (!$bsn->editUser($parametters)) {
 
-            foreach ($user->getMessages() as $message) {
+            foreach ($bsn->error as $message) {
                 $this->flash->error($message);
             }
 
-            $this->dispatcher->forward(array(
-                'controller' => "users",
-                'action' => 'edit',
-                'params' => array($user->id)
-            ));
+            $this->contextRedirect("maestros/users/edit/" . $id);
 
             return;
         }
@@ -262,21 +252,26 @@ class UsersController extends ControllerBase
      */
     public function deleteAction($id)
     {
-        $user = Users::findFirstByid($id);
-        if (!$user) {
-            $this->flash->error("user was not found");
+        $bsn = new UserBSN();
 
-            $this->dispatcher->forward(array(
-                'controller' => "users",
-                'action' => 'index'
-            ));
+        $param = array(
+            'id' => $id
+        );
+
+        $user = $bsn->show($param);
+
+        if (!$user) {
+
+            foreach ($bsn->error as $message) {
+                $this->flash->error($message);
+            }
 
             return;
         }
 
-        if (!$user->delete()) {
+        if (!$bsn->deleteCompleteUser($param)) {
 
-            foreach ($user->getMessages() as $message) {
+            foreach ($bsn->error as $message) {
                 $this->flash->error($message);
             }
 

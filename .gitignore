@@ -1,5 +1,4 @@
 .idea/
 last.zip
-src/config/config.php
 src/controllers/PruebaController.php
 vendor/

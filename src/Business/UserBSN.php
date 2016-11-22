@@ -173,7 +173,7 @@ class UserBSN extends Plugin
         $result = $result
             ->execute();
             */
-        if($result->count() > 0)
+        if($result != false)
             return $result;
         else{
             $this->error[] = $this->errors->NO_RECORDS_FOUND;
@@ -294,7 +294,7 @@ class UserBSN extends Plugin
 
 
         // CASO 2: $param es un array
-        if(!isset($param['user_id'])){
+        if(!isset($param['id'])){
 
             $this->error[] = $this->errors->MISSING_PARAMETERS;
             return false;
@@ -302,7 +302,7 @@ class UserBSN extends Plugin
 
 
 
-        $user = Users::findFirstById($param['user_id']);
+        $user = Users::findFirstById($param['id']);
 
         #si viene un solo parametro ($param['user_id']) no hay que cambiar nada por tanto no se updatea y retornamos true
         if(count($param) == 1)
@@ -317,7 +317,17 @@ class UserBSN extends Plugin
 
 
         foreach ($param as $key => $val) {
-            $user->$key = $val;
+            if ($key == 'password') {
+                if (!empty($val)) {
+                    $user->$key = $this->getDI()
+                        ->getSecurity()
+                        ->hash($val);
+                }
+
+            } else {
+                $user->$key = $val;
+            }
+
         }
 
 
@@ -436,11 +446,59 @@ class UserBSN extends Plugin
             $user = new Users();
         }
 
-
-        foreach ($param as $key => $val) {
-            $user->$key = $val;
+        if (isset($param['username'])) {
+            $user->username = $param['username'];
+        } else {
+            $this->error[] = $this->error->MISSING_PARAMETERS;
+            return false;
         }
 
+        if (isset($param['email'])) {
+            $user->email = $param['email'];
+        } else {
+            $this->error[] = $this->error->MISSING_PARAMETERS;
+            return false;
+        }
+
+        if (isset($param['avatar'])) {
+            $user->avatar = $param['avatar'];
+        } else {
+            $user->avatar = '';
+        }
+
+        if (isset($param['password'])) {
+            $user->password = $param['password'];
+        } else {
+            $user->password = '';
+        }
+
+        if (isset($param['banned'])) {
+            $user->banned = $param['banned'];
+        } else {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        if (isset($param['suspended'])) {
+            $user->suspended = $param['suspended'];
+        } else {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        if (isset($param['active'])) {
+            $user->active = $param['active'];
+        } else {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        if (isset($param['role_id'])) {
+            $user->role_id = $param['role_id'];
+        } else {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
 
         if($user->save() == false)
         {
@@ -774,6 +832,13 @@ class UserBSN extends Plugin
         return true;
     }
 
+    /**
+     * Cambiar el avatar del usuario logueado.
+     *
+     * @author jcocina
+     * @param $param 'imgdir' ruta de la imagen
+     * @return bool  true si la operacion es correcta
+     */
     public function changeAvatar($param) {
         if (!isset($param['imgdir'])) {
             $this->error[] = $this->errors->MISSING_PARAMETERS;
@@ -790,6 +855,341 @@ class UserBSN extends Plugin
             return false;
         }
         return true;
+    }
+
+    /**
+     * Trae la lista completa de roles
+     * @param void
+     * @return array de roles
+     *          'id' => 'name'
+     */
+    public function getAllRoles() {
+        $roles = Roles::find();
+        $roles_ = array('' => '-');
+        if($roles->count() != 0){
+            foreach ($roles as $role) {
+                $roles_[$role->id] = $role->name;
+            }
+            return $roles_;
+        } else {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+
+    }
+
+
+    /**
+     * Trae la lista completa de usuarios
+     * @param void
+     * @return lista de objetos users
+     */
+    public function getUsers($param) {
+        $query = "";
+        $and = false;
+
+        if (isset($param['id']) and !empty($param['id'])) {
+            if ($and) {
+                $query = $query . " and id = " . $param['id'];
+            } else {
+                $query = $query . " id = " . $param['id'];
+                $and = true;
+            }
+        }
+
+        if (isset($param['username']) and !empty($param['username'])) {
+            if ($and) {
+                $query = $query . " and username = '" . $param['username'] . "'";
+            } else {
+                $query = $query . " username = '" . $param['username'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['email']) and !empty($param['email'])) {
+            if ($and) {
+                $query = $query . " and email = '" . $param['email'] . "'";
+            } else {
+                $query = $query . " email = '" . $param['email'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['must_change_password']) and !empty($param['must_change_password'])) {
+            if ($and) {
+                $query = $query . " and must_change_password = " . $param['must_change_password'];
+            } else {
+                $query = $query . " must_change_password = " . $param['must_change_password'];
+                $and = true;
+            }
+        }
+
+        if (isset($param['banned']) and !empty($param['banned'])) {
+            if ($and) {
+                $query = $query . " and banned = '" . $param['banned'] . "'";
+            } else {
+                $query = $query . " banned = '" . $param['banned'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['suspended']) and !empty($param['suspended'])) {
+            if ($and) {
+                $query = $query . " and suspended = '" . $param['suspended'] . "'";
+            } else {
+                $query = $query . " suspended = '" . $param['suspended'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['active']) and !empty($param['active'])) {
+            if ($and) {
+                $query = $query . " and active = '" . $param['active'] . "'";
+            } else {
+                $query = $query . " active = '" . $param['active'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['role_id']) and !empty($param['role_id'])) {
+            if ($and) {
+                $query = $query . " and role_id = " . $param['role_id'];
+            } else {
+                $query = $query . " role_id = " . $param['role_id'];
+                $and = true;
+            }
+        }
+
+        if (isset($param['created_at']) and !empty($param['created_at'])) {
+            if ($and) {
+                $query = $query . " and created_at = '" . $param['created_at'] . "'";
+            } else {
+                $query = $query . " created_at = '" . $param['created_at'] . "'";
+                $and = true;
+            }
+        }
+
+        $users = Users::find($query);
+
+        if($users->count() != 0){
+            return $users;
+        } else {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+
+    }
+
+    /**
+     * Trata de eliminar un usuario por completo
+     *
+     * @author jcocina
+     * @param $param id id del usuario
+     * @return bool true si la operacion se realiza correctamente
+     */
+    public  function deleteCompleteUser ($param) {
+        if (!isset($param['id'])) {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        $user = Users::findFirst('id = ' . $param['id']);
+        if (!$user) {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+
+        $user_details = UserDetails::findFirst('user_id = ' . $param['id']);
+        if ($user_details) {
+            if (!$user_details->delete() or !$user->delete()) {
+                $this->error[] = $this->errors->UNKNOW;
+                return false;
+            } else {
+                return true;
+            }
+        }
+        if (!$user->delete()) {
+            $this->error[] = $this->errors->UNKNOW;
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public  function deleteCompleteUserDetails ($param) {
+        if (!isset($param['user_id'])) {
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        $user_details = UserDetails::findFirst('user_id = ' . $param['user_id']);
+
+        if (!$user_details) {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+
+        if ($user_details) {
+            if (!$user_details->delete()) {
+                $this->error[] = $this->errors->UNKNOW;
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Trae un objeto userDetails
+     *
+     * @author jcocina
+     * @param $param user_id id del usuario
+     * @return UserDetails|bool
+     */
+    public function showDetails($param) {
+        extract($param);
+
+        if (!isset($user_id)) {
+
+            $this->error[] = $this->errors->MISSING_PARAMETERS;
+            return false;
+        }
+
+        $result = UserDetails::findFirst('user_id = ' . $user_id);
+
+
+        if($result != false)
+            return $result;
+        else{
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+    }
+
+    /**
+     * Trae la lista de usrnames o emails asociados a los ids de usuarios
+     * @param void
+     * @return Array    donde las keys son los id de los usuarios
+     *                  y los values los emails o usernames.
+     */
+    public function usernameList() {
+        $users = Users::find();
+
+        $users_ = array('' => '-');
+        if($users->count() != 0){
+
+            foreach ($users as $user) {
+
+                if (!empty($user->username) and isset($user->username)) {
+                    $users_[$user->id] = $user->username;
+                } else if (!empty($user->email) and isset($user->email)) {
+                    $users_[$user->id] = $user->email;
+                }
+
+            }
+
+            return $users_;
+        } else {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+    }
+
+    public function getUserDetails($param) {
+
+        $query = "";
+        $and = false;
+
+        if (isset($param['user_id']) and !empty($param['user_id'])) {
+            if ($and) {
+                $query = $query . " and user_id = " . $param['user_id'];
+            } else {
+                $query = $query . " user_id = " . $param['user_id'];
+                $and = true;
+            }
+        }
+
+        if (isset($param['firstname']) and !empty($param['firstname'])) {
+            if ($and) {
+                $query = $query . " and firstname = '" . $param['firstname'] . "'";
+            } else {
+                $query = $query . " firstname = '" . $param['firstname'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['lastname']) and !empty($param['lastname'])) {
+            if ($and) {
+                $query = $query . " and lastname = '" . $param['lastname'] . "'";
+            } else {
+                $query = $query . " lastname = '" . $param['lastname'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['rut']) and !empty($param['rut'])) {
+            if ($and) {
+                $query = $query . " and rut = '" . $param['rut'] . "'";
+            } else {
+                $query = $query . " rut = '" . $param['rut'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['location']) and !empty($param['location'])) {
+            if ($and) {
+                $query = $query . " and location = '" . $param['location'] . "'";
+            } else {
+                $query = $query . " location = '" . $param['location'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['phone_fixed']) and !empty($param['phone_fixed'])) {
+            if ($and) {
+                $query = $query . " and phone_fixed = '" . $param['phone_fixed'] . "'";
+            } else {
+                $query = $query . " phone_fixed = '" . $param['phone_fixed'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['phone_mobile']) and !empty($param['phone_mobile'])) {
+            if ($and) {
+                $query = $query . " and phone_mobile = '" . $param['phone_mobile'] . "'";
+            } else {
+                $query = $query . " phone_mobile = '" . $param['phone_mobile'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['sexo']) and !empty($param['sexo'])) {
+            if ($and) {
+                $query = $query . " and sexo = '" . $param['sexo'] . "'";
+            } else {
+                $query = $query . " sexo = '" . $param['sexo'] . "'";
+                $and = true;
+            }
+        }
+
+        if (isset($param['birthdate']) and !empty($param['birthdate'])) {
+            if ($and) {
+                $query = $query . " and birthdate = '" . $param['birthdate'] . "'";
+            } else {
+                $query = $query . " birthdate = '" . $param['birthdate'] . "'";
+                $and = true;
+            }
+        }
+
+        $users = UserDetails::find($query);
+
+        if($users->count() != 0){
+            return $users;
+        } else {
+            $this->error[] = $this->errors->NO_RECORDS_FOUND;
+            return false;
+        }
+
     }
 
 }

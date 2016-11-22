@@ -22,6 +22,13 @@ class ProfileController extends ControllerBase
         $user = $this->userBsn->show(array('id' => $this->session->get("auth-identity")['id']));
         $details = $this->userBsn->getUserDetailsById($user->id);
 
+        $this->tag->setDefault("firstname", $details->firstname);
+        $this->tag->setDefault("lastname", $details->lastname);
+        $this->tag->setDefault("rut", $details->rut);
+        $this->tag->setDefault("location", $details->location);
+        $this->tag->setDefault("phone_fixed", $details->phone_fixed);
+        $this->tag->setDefault("phone_mobile", $details->phone_mobile);
+
         $this->view->setVar('details', $details);
         $this->view->setVar('user', $user);
         $this->view->setVar('avatar', $user->avatar);
@@ -78,135 +85,160 @@ class ProfileController extends ControllerBase
             }
 
         }
-        $this->mifaces->run();
+            $this->mifaces->run();
+        }
+        else {
+            $this->defaultRedirect();
+        }
     }
-    else {
-        $this->defaultRedirect();
-    }
-}
 
-public function changeavatarAction() {
-    if ($this->request->isAjax()) {
-        $this->mifaces->newFaces();
+    public function changeavatarAction() {
+        if ($this->request->isAjax()) {
+            $this->mifaces->newFaces();
 
-        if ($this->request->hasFiles() == true) {
+            if ($this->request->hasFiles() == true) {
 
-            $files = $this->request->getUploadedFiles();
+                $files = $this->request->getUploadedFiles();
 
-            foreach ($files as $file_name => $file) {
+                foreach ($files as $file_name => $file) {
 
-                if(isset($file)){
-                    if(strpos($file->getRealType(), 'image') !== false) {
+                    if(isset($file)){
+                        if(strpos($file->getRealType(), 'image') !== false) {
 
-                        $user = $this->userBsn->show(array('id' => $this->session->get("auth-identity")['id']));
+                            $user = $this->userBsn->show(array('id' => $this->session->get("auth-identity")['id']));
 
-                        if ($user->avatar == "pic/avatar/default.png"){
+                            if ($user->avatar == "pic/avatar/default.png"){
 
-                            $name = BASE_LOCATION . date('Y_m_d-H_i_s') . $file->getName();
+                                $name = BASE_LOCATION . date('Y_m_d-H_i_s') . $file->getName();
 
-                        }
-                        else{
-                             $name = $user->avatar;
-                        }
-                        //echo $name;exit;
-                        if(!$file->moveTo($name))
-                            $this->mifaces->addToMsg('danger',"Error al subir la imagen, repita el procedimiento",true);
-
-
-                        if($this->userBsn->changeAvatar(array('imgdir'=> $name))) {
-                            $this->mifaces->addToMsg('success', 'Avatar correcto, porfavor corte imagen.');
-                            $this->mifaces->addToDataView('errorform', 'false', false );       
-
-                            $dataView['avatar'] = $this->di->get('url')->getBaseUri() . $user->avatar;
-                            $toRend = $this->view->getPartial("controllers/profile/avatar_change/modal_resize", $dataView);
-
-                            $this->mifaces->addToRend('modal-inner-content', $toRend);
-                        } else {
-                            $msg = '';
-                            foreach ($this->userBsn->error as $error) {
-                                $msg = $msg . $error . '.<br>';
                             }
-                            $this->mifaces->addToMsg('danger', $msg);
+                            else{
+                                 $name = $user->avatar;
+                            }
+                            //echo $name;exit;
+                            if(!$file->moveTo($name))
+                                $this->mifaces->addToMsg('danger',"Error al subir la imagen, repita el procedimiento",true);
+
+
+                            if($this->userBsn->changeAvatar(array('imgdir'=> $name))) {
+                                $this->mifaces->addToMsg('success', 'Avatar correcto, porfavor corte imagen.');
+                                $this->mifaces->addToDataView('errorform', 'false', false );
+
+                                $dataView['avatar'] = $this->di->get('url')->getBaseUri() . $user->avatar;
+                                $toRend = $this->view->getPartial("controllers/profile/avatar_change/modal_resize", $dataView);
+
+                                $this->mifaces->addToRend('modal-inner-content', $toRend);
+                            } else {
+                                $msg = '';
+                                foreach ($this->userBsn->error as $error) {
+                                    $msg = $msg . $error . '.<br>';
+                                }
+                                $this->mifaces->addToMsg('danger', $msg);
+                                $this->mifaces->addToDataView('errorform', 'true', false);
+                            }
+
+                        } else {
+                            $this->mifaces->addToMsg('danger','El archivo debe ser una imagen ');
                             $this->mifaces->addToDataView('errorform', 'true', false);
                         }
 
-                    } else {
-                        $this->mifaces->addToMsg('danger','El archivo debe ser una imagen ');
-                        $this->mifaces->addToDataView('errorform', 'true', false);
+
                     }
-
-
                 }
+            } else {
+                $this->mifaces->addToMsg('danger','Tiene que seleccionar un archivo');
             }
-        } else {
-            $this->mifaces->addToMsg('danger','Tiene que seleccionar un archivo');
+
+            $this->mifaces->run();
         }
-
-        $this->mifaces->run();
+        else {
+            $this->defaultRedirect();
+        }
     }
-    else {
-        $this->defaultRedirect();
-    }
-}
 
-public function uploadavatarAction() {
-    if ($this->request->isAjax()) {
-        if ($this->request->hasFiles() == true) {
+    public function uploadavatarAction() {
+        if ($this->request->isAjax()) {
+            if ($this->request->hasFiles() == true) {
 
-            $files = $this->request->getUploadedFiles();
-            $view = "controllers/profile/avatar";
-            $view_modal = "controllers/profile/avatar_change/modal";
+                $files = $this->request->getUploadedFiles();
+                $view = "controllers/profile/avatar";
+                $view_modal = "controllers/profile/avatar_change/modal";
 
-            foreach ($files as $file_name => $file) {
+                foreach ($files as $file_name => $file) {
 
-                if(isset($file)){
-                    if(strpos($file->getRealType(), 'image') !== false) {
+                    if(isset($file)){
+                        if(strpos($file->getRealType(), 'image') !== false) {
 
-                        $param = [
-                        'id' => $this->session->get("auth-identity")['id']
-                        ];
+                            $param = [
+                            'id' => $this->session->get("auth-identity")['id']
+                            ];
 
-                        $user = $this->userBsn->show($param);
+                            $user = $this->userBsn->show($param);
 
-                        $file->moveTo($user->avatar);
+                            $file->moveTo($user->avatar);
 
 
 
 
-                        $details = $this->userBsn->getUserDetailsById($user->id);
+                            $details = $this->userBsn->getUserDetailsById($user->id);
 
-                        $dataView['details'] = $details;
-                        $dataView['avatar'] =  $user->avatar;
-
-
-                        $toRend = $this->view->getPartial($view, $dataView);
-
-                        $toRendModal = $this->view->getPartial($view_modal, []);
-
-                        $this->mifaces->addToRend('avatar_render', $toRend);
-                        $this->mifaces->addToRend('modal-chav', $toRendModal);
+                            $dataView['details'] = $details;
+                            $dataView['avatar'] =  $user->avatar;
 
 
-                        $this->mifaces->addToMsg('success', 'Avatar modificado correctamente');
-                        $this->mifaces->addToDataView('croperror', 'false', false );
+                            $toRend = $this->view->getPartial($view, $dataView);
+
+                            $toRendModal = $this->view->getPartial($view_modal, []);
+
+                            $this->mifaces->addToRend('avatar_render', $toRend);
+                            $this->mifaces->addToRend('modal-chav', $toRendModal);
 
 
-                    } else {
-                        $this->mifaces->addToMsg('danger','El archivo debe ser una imagen ');
-                        $this->mifaces->addToDataView('croperror', 'true', false);
+                            $this->mifaces->addToMsg('success', 'Avatar modificado correctamente');
+                            $this->mifaces->addToDataView('croperror', 'false', false );
+
+
+                        } else {
+                            $this->mifaces->addToMsg('danger','El archivo debe ser una imagen ');
+                            $this->mifaces->addToDataView('croperror', 'true', false);
+                        }
+
+
                     }
-
-
                 }
+            } else {
+                $this->mifaces->addToMsg('danger','Tiene que seleccionar un archivo');
             }
-        } else {
-            $this->mifaces->addToMsg('danger','Tiene que seleccionar un archivo');
-        }
 
-        $this->mifaces->run();
+            $this->mifaces->run();
+        }
+        else{
+            $this->defaultRedirect();
+        }
     }
-    else{
-        $this->defaultRedirect();
+
+    public function editAction() {
+        if ($this->request->isPost()) {
+            $param = array(
+                'user_id' => $this->session->get("auth-identity")['id']
+            );
+
+            $user_detail = $this->userBsn->showDetails($param);
+
+            $parametter = array();
+            $parametter['user_id'] = $this->session->get("auth-identity")['id'];
+            $parametter['firstname'] = $this->request->getPost("firstname");
+            $parametter['lastname'] = $this->request->getPost("lastname");
+            $parametter['rut'] = $this->request->getPost("rut");
+            $parametter['location'] = $this->request->getPost("location");
+            $parametter['phone_fixed'] = $this->request->getPost("phone_fixed");
+            $parametter['phone_mobile'] = $this->request->getPost("phone_mobile");
+
+            $this->userBsn->editUserDetails($parametter);
+
+            $this->contextRedirect("profile");
+        } else {
+            $this->defaultRedirect();
+        }
     }
-}
 }
